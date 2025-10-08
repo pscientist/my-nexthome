@@ -1,11 +1,14 @@
-
-import { FlatList, SafeAreaView, StyleSheet, Text, View } from "react-native";
+import { Link } from "expo-router";
+import { FlatList, Image, Pressable, SafeAreaView, StyleSheet, Text, View } from "react-native";
 
 const houses = [
     { id: "1", title: "Modern Loft", price: "$2,300/mo", location: "Downtown" },
     { id: "2", title: "Cozy Bungalow", price: "$1,850/mo", location: "Maple Street" },
     { id: "3", title: "Lake House", price: "$3,100/mo", location: "Harbor Bay" },
-    { id: "4", title: "Suburban Retreat", price: "$2,000/mo", location: "Cedar Grove" },
+    {
+        id: "4", title: "Suburban Retreat", price: "$2,000/mo", location: "Cedar Grove",
+        image: require('../assets/images/open_home1.jpg')
+    },
 ];
 
 export default function Houses() {
@@ -18,11 +21,28 @@ export default function Houses() {
                 ListHeaderComponent={<Text style={styles.screenTitle}>Houses</Text>}
                 ListHeaderComponentStyle={styles.header}
                 renderItem={({ item }) => (
-                    <View style={styles.card}>
-                        <Text style={styles.houseTitle}>{item.title}</Text>
-                        <Text style={styles.housePrice}>{item.price}</Text>
-                        <Text style={styles.houseLocation}>{item.location}</Text>
-                    </View>
+                    <Link href={{
+                        pathname: '/house-details',
+                        params: {
+                            id: item.id,
+                            title: item.title,
+                            price: item.price,
+                            location: item.location,
+                            image: item.image
+                        }
+                    }} asChild
+                    >
+                        <Pressable style={styles.card}>
+                            <View style={styles.imagePlaceholder}>
+                                <Image source={item.image} style={styles.image} />
+                            </View>
+                            <View style={styles.cardContent}>
+                                <Text style={styles.houseTitle}>{item.title}</Text>
+                                <Text style={styles.housePrice}>{item.price}</Text>
+                                <Text style={styles.houseLocation}>{item.location}</Text>
+                            </View>
+                        </Pressable>
+                    </Link>
                 )}
             />
         </SafeAreaView>
@@ -37,7 +57,7 @@ const styles = StyleSheet.create({
     card: {
         backgroundColor: "#FFF6EC",
         borderRadius: 16,
-        padding: 20,
+        padding: 16,
         shadowColor: "#B79C7F",
         shadowOffset: { width: 0, height: 8 },
         shadowOpacity: 0.12,
@@ -45,6 +65,29 @@ const styles = StyleSheet.create({
         elevation: 3,
         borderWidth: 1,
         borderColor: "#E0D0BD",
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 16,
+    },
+    imagePlaceholder: {
+        width: 80,
+        height: 80,
+        borderRadius: 12,
+        backgroundColor: "#E0D0BD",
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    image: {
+        width: 80,
+        height: 80,
+        borderRadius: 12,
+    },
+
+    imagePlaceholderText: {
+        fontSize: 32,
+    },
+    cardContent: {
+        flex: 1,
     },
     houseTitle: { fontSize: 18, fontWeight: "600", marginBottom: 8, color: "#47372C" },
     housePrice: { fontSize: 16, fontWeight: "600", color: "#C97A40", marginBottom: 6 },

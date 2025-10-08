@@ -1,127 +1,231 @@
-import { useState } from "react";
-import { Pressable, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
-import RNPickerSelect from 'react-native-picker-select';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import NetInfo from '@react-native-community/netinfo';
+import { Formik } from 'formik';
+import { useEffect, useState } from 'react';
+import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import { SafeAreaView } from 'react-native-safe-area-context';
+import * as Yup from 'yup';
+
+// Storage key
+const LISTINGS_STORAGE_KEY = '@househunt_listings';
+
+// Types
+interface ListingFormValues {
+    title: string;
+    location: string;
+    priceRange: string;
+    rooms: string;
+    notes: string;
+}
+
+interface StoredListing extends ListingFormValues {
+    id: string;
+    createdAt: string;
+    updatedAt: string;
+    synced: boolean;
+}
+
+// Validation schema
+const listingValidationSchema = Yup.object().shape({
+    title: Yup.string()
+        .min(3, 'Title must be at least 3 characters')
+        .required('Title is required'),
+    location: Yup.string()
+        .min(3, 'Location must be at least 3 characters')
+        .required('Location is required'),
+    priceRange: Yup.string()
+        .required('Price range is required'),
+    rooms: Yup.string()
+        .matches(/^[0-9]+$/, 'Must be a valid number')
+        .required('Number of rooms is required'),
+    notes: Yup.string()
+});
 
 export default function Add() {
-    const [selectedRooms, setSelectedRooms] = useState<string>("");
+    const [isConnected, setIsConnected] = useState<boolean | null>(null);
 
-    const roomOptions = [
-        { label: '1 Room', value: 1 },
-        { label: '2 Rooms', value: 2 },
-        { label: '3 Rooms', value: 3 },
-        { label: '4 Rooms', value: 4 },
-        { label: '5 Rooms', value: 5 },
-    ];
+    useEffect(() => {
+        const unsubscribe = NetInfo.addEventListener(state => {
+            setIsConnected(state.isConnected);
+            console.log('Network state changed:', state.isConnected);
+            console.log('Network type:', state.type);
+        });
+
+        return () => unsubscribe();
+    }, []
+    );
+
+
+    const initialValues: ListingFormValues = {
+        title: '',
+        location: '',
+        priceRange: '',
+        rooms: '',
+        notes: '',
+    };
+
+    const handleSubmit = async (values: ListingFormValues, { resetForm }: any) => {
+        try {
+            // Create a new listing with metadata
+            const newListing: StoredListing = {
+                ...values,
+                id: Date.now().toString(), // Simple ID generation
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+                synced: false, // Not yet synced to server
+            };
+
+            // Get existing listings from AsyncStorage
+            const existingData = await AsyncStorage.getItem(LISTINGS_STORAGE_KEY);
+            const listings: StoredListing[] = existingData ? JSON.parse(existingData) : [];
+
+            // Add new listing to the array
+            listings.push(newListing);
+
+            // Save back to AsyncStorage
+            await AsyncStorage.setItem(LISTINGS_STORAGE_KEY, JSON.stringify(listings));
+
+            console.log('Listing saved successfully:', newListing);
+
+            // Show success message
+            Alert.alert(
+                'Success',
+                'Listing saved locally! It will be synced to the server later.',
+                [{ text: 'OK' }]
+            );
+
+            // Reset the form
+            resetForm();
+        } catch (error) {
+            console.error('Error saving listing:', error);
+            Alert.alert(
+                'Error',
+                'Failed to save listing. Please try again.',
+                [{ text: 'OK' }]
+            );
+        }
+    };
 
     return (
         <SafeAreaView style={styles.safeArea}>
-            <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-                <Text style={styles.screenTitle}>Add / Edit Listing</Text>
+            <Formik
+                initialValues={initialValues}
+                validationSchema={listingValidationSchema}
+                onSubmit={handleSubmit}
+            >
+                {({ handleChange, handleBlur, handleSubmit, setFieldValue, values, errors, touched }) => (
+                    <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+                        <Text style={styles.screenTitle}>Add / Edit Listing</Text>
 
-                <View style={styles.formCard}>
-                    <View style={styles.fieldGroup}>
-                        <Text style={styles.label}>Title</Text>
-                        <TextInput
-                            style={styles.input}
-                            placeholder="e.g. Charming Loft in Downtown"
-                            placeholderTextColor="#B79C7F"
-                        />
-                    </View>
+                        <View style={styles.formCard}>
+                            <View style={styles.fieldGroup}>
+                                <Text style={styles.label}>Title</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="e.g. Charming Loft in Downtown"
+                                    placeholderTextColor="#B79C7F"
+                                    onChangeText={handleChange('title')}
+                                    onBlur={handleBlur('title')}
+                                    value={values.title}
+                                />
+                                {touched.title && errors.title && (
+                                    <Text style={styles.errorText}>{errors.title}</Text>
+                                )}
+                            </View>
 
-                    <View style={styles.fieldGroup}>
-                        <Text style={styles.label}>Location</Text>
-                        <TextInput
-                            style={styles.input}
-                            placeholder="e.g. 42 Maple Street"
-                            placeholderTextColor="#B79C7F"
-                        />
-                    </View>
+                            <View style={styles.fieldGroup}>
+                                <Text style={styles.label}>Location</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="e.g. 42 Maple Street"
+                                    placeholderTextColor="#B79C7F"
+                                    onChangeText={handleChange('location')}
+                                    onBlur={handleBlur('location')}
+                                    value={values.location}
+                                />
+                                {touched.location && errors.location && (
+                                    <Text style={styles.errorText}>{errors.location}</Text>
+                                )}
+                            </View>
 
-                    <View style={styles.fieldGroup}>
-                        <Text style={styles.label}>Price Range</Text>
-                        <TextInput
-                            style={styles.input}
-                            placeholder="e.g. $1,800 - $2,200"
-                            placeholderTextColor="#B79C7F"
-                        />
-                    </View>
+                            <View style={styles.fieldGroup}>
+                                <Text style={styles.label}>Price Range</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="e.g. $1,800 - $2,200"
+                                    placeholderTextColor="#B79C7F"
+                                    onChangeText={handleChange('priceRange')}
+                                    onBlur={handleBlur('priceRange')}
+                                    value={values.priceRange}
+                                />
+                                {touched.priceRange && errors.priceRange && (
+                                    <Text style={styles.errorText}>{errors.priceRange}</Text>
+                                )}
+                            </View>
 
-                    <View style={styles.fieldGroup}>
-                        <Text style={styles.label}>Number of Rooms</Text>
-                        <View style={styles.pickerWrapper}>
-                            <RNPickerSelect
-                                onValueChange={(value) => setSelectedRooms(value)}
-                                items={roomOptions}
-                                placeholder={{
-                                    label: 'Select...',
-                                    value: null,
-                                    color: '#9EA0A4',
-                                }}
-                                style={pickerSelectStyles}
-                                value={selectedRooms}
-                            />
-                        </View>
-                    </View>
+                            <View style={styles.fieldGroup}>
+                                <Text style={styles.label}>Number of Rooms</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="e.g. 3"
+                                    placeholderTextColor="#B79C7F"
+                                    keyboardType="numeric"
+                                    onChangeText={handleChange('rooms')}
+                                    onBlur={handleBlur('rooms')}
+                                    value={values.rooms}
+                                />
+                                {touched.rooms && errors.rooms && (
+                                    <Text style={styles.errorText}>{errors.rooms}</Text>
+                                )}
+                            </View>
 
-                    <View style={styles.fieldGroup}>
-                        <View style={styles.fieldHeader}>
-                            <Text style={styles.label}>Images</Text>
-                            <Pressable style={styles.uploadButton} onPress={() => { }}>
-                                <Text style={styles.uploadButtonText}>Upload Image</Text>
+                            <View style={styles.fieldGroup}>
+                                <View style={styles.fieldHeader}>
+                                    <Text style={styles.label}>Images</Text>
+                                    <Pressable style={styles.uploadButton} onPress={() => { }}>
+                                        <Text style={styles.uploadButtonText}>Upload Image</Text>
+                                    </Pressable>
+                                </View>
+                                <View style={styles.imageGrid}>
+                                    <View style={styles.imagePlaceholder}>
+                                        <Text style={styles.imagePlaceholderText}>Image 1</Text>
+                                    </View>
+                                    <View style={styles.imagePlaceholder}>
+                                        <Text style={styles.imagePlaceholderText}>Image 2</Text>
+                                    </View>
+                                    <View style={styles.imagePlaceholder}>
+                                        <Text style={styles.imagePlaceholderText}>Image 3</Text>
+                                    </View>
+                                </View>
+                            </View>
+
+                            <View style={styles.fieldGroup}>
+                                <Text style={styles.label}>Notes</Text>
+                                <TextInput
+                                    style={[styles.input, styles.notesInput]}
+                                    placeholder="Add viewing notes, highlights, or questions"
+                                    placeholderTextColor="#B79C7F"
+                                    multiline
+                                    textAlignVertical="top"
+                                    onChangeText={handleChange('notes')}
+                                    onBlur={handleBlur('notes')}
+                                    value={values.notes}
+                                />
+                                {touched.notes && errors.notes && (
+                                    <Text style={styles.errorText}>{errors.notes}</Text>
+                                )}
+                            </View>
+
+                            <Pressable style={styles.submitButton} onPress={() => handleSubmit()}>
+                                <Text style={styles.submitButtonText}>Save Listing</Text>
                             </Pressable>
                         </View>
-                        <View style={styles.imageGrid}>
-                            <View style={styles.imagePlaceholder}>
-                                <Text style={styles.imagePlaceholderText}>Image 1</Text>
-                            </View>
-                            <View style={styles.imagePlaceholder}>
-                                <Text style={styles.imagePlaceholderText}>Image 2</Text>
-                            </View>
-                            <View style={styles.imagePlaceholder}>
-                                <Text style={styles.imagePlaceholderText}>Image 3</Text>
-                            </View>
-                        </View>
-                    </View>
-
-                    <View style={styles.fieldGroup}>
-                        <Text style={styles.label}>Notes</Text>
-                        <TextInput
-                            style={[styles.input, styles.notesInput]}
-                            placeholder="Add viewing notes, highlights, or questions"
-                            placeholderTextColor="#B79C7F"
-                            multiline
-                            textAlignVertical="top"
-                        />
-                    </View>
-                </View>
-            </ScrollView>
+                    </ScrollView>
+                )}
+            </Formik>
         </SafeAreaView>
     );
 }
-
-const pickerSelectStyles = StyleSheet.create({
-    inputIOS: {
-        fontSize: 16,
-        paddingVertical: 12,
-        paddingHorizontal: 10,
-        borderWidth: 1,
-        borderColor: 'gray',
-        borderRadius: 8,
-        color: 'black',
-        paddingRight: 30, // to ensure the text is never behind the icon
-    },
-    inputAndroid: {
-        fontSize: 16,
-        paddingHorizontal: 10,
-        paddingVertical: 8,
-        borderWidth: 0.5,
-        borderColor: 'purple',
-        borderRadius: 8,
-        color: 'black',
-        paddingRight: 30, // to ensure the text is never behind the icon
-    },
-});
-
 
 const styles = StyleSheet.create({
     safeArea: {
@@ -211,20 +315,32 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: "#47372C",
     },
-    pickerWrapper: {
-        borderRadius: 12,
-        borderWidth: 1,
-        borderColor: "#E8CDAA",
-        backgroundColor: "#FFF1E1",
-        overflow: "hidden",
-    },
-    picker: {
-        height: 52,
-        color: "#47372C",
-    },
     notesInput: {
         minHeight: 120,
         lineHeight: 22,
+    },
+    errorText: {
+        color: '#D32F2F',
+        fontSize: 13,
+        marginTop: 4,
+        fontWeight: '500',
+    },
+    submitButton: {
+        backgroundColor: "#D8A05E",
+        borderRadius: 12,
+        paddingVertical: 16,
+        paddingHorizontal: 24,
+        borderWidth: 1,
+        borderColor: "#C28949",
+        alignItems: 'center',
+        marginTop: 8,
+    },
+    submitButtonText: {
+        fontSize: 16,
+        fontWeight: "700",
+        color: "#3A2F2F",
+        letterSpacing: 0.5,
+        textTransform: "uppercase",
     },
 });
 

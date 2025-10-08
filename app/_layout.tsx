@@ -77,6 +77,12 @@ export default function RootLayout() {
           ),
         }}
       />
+      <Tabs.Screen
+        name="house-details"
+        options={{
+          href: null,
+        }}
+      />
     </Tabs>
   );
 }
