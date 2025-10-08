@@ -1,10 +1,18 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Image, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import MapView, { Marker } from 'react-native-maps';
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function HouseDetails() {
     const router = useRouter();
     const { title = "House Title", price = "$0/mo", location = "—" } = useLocalSearchParams();
+    const region = {
+        latitude: -36.8485, // Auckland latitude
+        longitude: 174.7633, // Auckland longitude
+        latitudeDelta: 0.05,
+        longitudeDelta: 0.05,
+    };
 
     return (
         <SafeAreaView style={styles.safeArea}>
@@ -18,10 +26,11 @@ export default function HouseDetails() {
                 </View>
 
                 <View style={styles.photoBox}>
-                    {/* Placeholder image; swap to <Image source={...} /> when you have a URL/file */}
-                    <View style={styles.photoPlaceholder}>
-                        <MaterialIcons name="photo" size={48} color="#A89077" />
-                    </View>
+                    <Image
+                        resizeMode="cover"
+                        source={require("../assets/images/open_home1.jpg")}
+                        style={styles.photo}
+                    />
                 </View>
 
                 <View style={styles.infoCard}>
@@ -35,16 +44,28 @@ export default function HouseDetails() {
                 <View style={styles.mapCard}>
                     <Text style={styles.mapTitle}>Location</Text>
                     <View style={styles.mapPlaceholder}>
-                        <MaterialIcons name="map" size={28} color="#A89077" />
-                        <Text style={styles.mapPlaceholderText}>Map placeholder</Text>
+                        <MapView
+                            style={styles.map}
+                            initialRegion={region}
+                            showsUserLocation={false}
+                            showsCompass={false}
+                        >
+                            <Marker
+                                coordinate={{ latitude: -36.8485, longitude: 174.7633 }}
+                                title="Sample Home"
+                                description="123 Queen Street, Auckland"
+                            />
+                        </MapView>
                     </View>
                 </View>
+
             </ScrollView>
         </SafeAreaView>
     );
 }
 
 const styles = StyleSheet.create({
+
     safeArea: { flex: 1, backgroundColor: "#F2E9DC" },
     content: { padding: 24, gap: 20 },
     headerRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
@@ -54,7 +75,15 @@ const styles = StyleSheet.create({
     },
     headerTitle: { fontSize: 18, fontWeight: "700", color: "#3A2F2F" },
 
-    photoBox: {},
+    photoBox: {
+        height: 180,
+        borderRadius: 16,
+        overflow: "hidden",
+        borderWidth: 1,
+        borderColor: "#D8C6B2",
+        backgroundColor: "#E0D0BD"
+    },
+    photo: { width: "100%", height: "100%" },
     photoPlaceholder: {
         height: 240, borderRadius: 16, backgroundColor: "#E0D0BD",
         alignItems: "center", justifyContent: "center",
@@ -72,6 +101,11 @@ const styles = StyleSheet.create({
     metaRow: { flexDirection: "row", alignItems: "center", gap: 8 },
     metaText: { fontSize: 16, color: "#7C6655" },
 
+    map: {
+        width: '100%',
+        height: 300,
+        borderRadius: 12,
+    },
     mapCard: {
         backgroundColor: "#FFF6EC", borderRadius: 16, padding: 16,
         borderWidth: 1, borderColor: "#E0D0BD",
@@ -80,9 +114,9 @@ const styles = StyleSheet.create({
     },
     mapTitle: { fontSize: 16, fontWeight: "700", color: "#3A2F2F" },
     mapPlaceholder: {
-        height: 180, borderRadius: 12, backgroundColor: "#E0D0BD",
+        height: 300, borderRadius: 12, backgroundColor: "#E0D0BD",
         alignItems: "center", justifyContent: "center",
-        borderWidth: 1, borderColor: "#D8C6B2", gap: 6
+        borderWidth: 1, borderColor: "#D8C6B2", gap: 6, flex: 1,
     },
     mapPlaceholderText: { color: "#7C6655" },
 });
