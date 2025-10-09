@@ -114,7 +114,8 @@ export default function Add() {
                 onSubmit={handleSubmit}
             >
                 {({ handleChange, handleBlur, handleSubmit, setFieldValue, values, errors, touched }) => (
-                    <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+                    <ScrollView contentContainerStyle={styles.content}
+                        showsVerticalScrollIndicator={false}>
                         <Text style={styles.screenTitle}>Add / Edit Listing</Text>
 
                         <View style={styles.formCard}>
