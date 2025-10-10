@@ -1,5 +1,8 @@
+import { cdnUrl, uploadToCloudinary } from '@/utils/cloudinary';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import NetInfo from '@react-native-community/netinfo';
+import * as ImageManipulator from 'expo-image-manipulator';
+import * as ImagePicker from 'expo-image-picker';
 import { Formik } from 'formik';
 import { useEffect, useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
@@ -12,10 +15,10 @@ const LISTINGS_STORAGE_KEY = '@househunt_listings';
 // Types
 interface ListingFormValues {
     title: string;
-    location: string;
-    priceRange: string;
-    rooms: string;
-    notes: string;
+    // location: string;
+    // priceRange: string;
+    // rooms: string; 
+    // notes: string;
 }
 
 interface StoredListing extends ListingFormValues {
@@ -26,23 +29,37 @@ interface StoredListing extends ListingFormValues {
 }
 
 // Validation schema
+// const listingValidationSchema = Yup.object().shape({
+//     title: Yup.string()
+//         .min(3, 'Title must be at least 3 characters')
+//         .required('Title is required'),
+//     location: Yup.string()
+//         .min(3, 'Location must be at least 3 characters')
+//         .required('Location is required'),
+//     priceRange: Yup.string()
+//         .required('Price range is required'),
+//     rooms: Yup.string()
+//         .matches(/^[0-9]+$/, 'Must be a valid number')
+//         .required('Number of rooms is required'),
+//     notes: Yup.string()
+// });
+
 const listingValidationSchema = Yup.object().shape({
     title: Yup.string()
-        .min(3, 'Title must be at least 3 characters')
-        .required('Title is required'),
+        .min(3, 'Title must be at least 3 characters'),
     location: Yup.string()
-        .min(3, 'Location must be at least 3 characters')
-        .required('Location is required'),
-    priceRange: Yup.string()
-        .required('Price range is required'),
+        .min(3, 'Location must be at least 3 characters'),
+    priceRange: Yup.string(),
     rooms: Yup.string()
-        .matches(/^[0-9]+$/, 'Must be a valid number')
-        .required('Number of rooms is required'),
+        .matches(/^[0-9]+$/, 'Must be a valid number'),
     notes: Yup.string()
 });
 
-export default function Add() {
+export default function AddEditForm() {
     const [isConnected, setIsConnected] = useState<boolean | null>(null);
+    const [uploading, setUploading] = useState(false);
+    const [fullUrl, setFullUrl] = useState<string | null>(null);
+    const [thumbUrl, setThumbUrl] = useState<string | null>(null);
 
     useEffect(() => {
         const unsubscribe = NetInfo.addEventListener(state => {
@@ -55,13 +72,60 @@ export default function Add() {
     }, []
     );
 
+    const onUpload = async () => {
+        try {
+            setUploading(true);
+
+            // 1) Permission + pick
+            const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+            if (!perm.granted) throw new Error('Permission to access photos is required.');;
+
+            const pick = await ImagePicker.launchImageLibraryAsync({
+                mediaTypes: ImagePicker.MediaTypeOptions.Images,
+                allowsEditing: false,
+                quality: 1,
+            });
+            if (pick.canceled) return;
+
+            const original = pick.assets[0].uri;
+
+            // 2) (Optional) compress/normalize: to JPEG, max width 1600
+            const manip = await ImageManipulator.manipulateAsync(
+                original,
+                [{ resize: { width: 1600 } }],
+                { compress: 0.75, format: ImageManipulator.SaveFormat.JPEG }
+            );
+
+            // 3) Upload to Cloudinary (unsigned)
+            const result = await uploadToCloudinary({
+                fileUri: manip.uri,
+                folder: 'mynexthome', // e.g., per listing/user
+            });
+
+            // 4) Build optimized URLs (Edge-transformed)
+            const bestForFeed = cdnUrl(result.public_id, { w: 1200 });   // large display
+            const tinyThumb = cdnUrl(result.public_id, { w: 400 });    // thumbnail
+
+            setFullUrl(bestForFeed);
+            setThumbUrl(tinyThumb);
+
+            Alert.alert('Uploaded!', 'Your photo is live on the CDN.');
+
+        } catch (e: any) {
+            console.error(e);
+            Alert.alert('Upload failed', e.message ?? 'Unknown error');
+
+        } finally {
+            setUploading(false);
+        }
+    }
 
     const initialValues: ListingFormValues = {
         title: '',
-        location: '',
-        priceRange: '',
-        rooms: '',
-        notes: '',
+        // location: '',
+        // priceRange: '',
+        // rooms: '',
+        // notes: '',
     };
 
     const handleSubmit = async (values: ListingFormValues, { resetForm }: any) => {
@@ -96,6 +160,7 @@ export default function Add() {
 
             // Reset the form
             resetForm();
+
         } catch (error) {
             console.error('Error saving listing:', error);
             Alert.alert(
@@ -134,7 +199,7 @@ export default function Add() {
                                 )}
                             </View>
 
-                            <View style={styles.fieldGroup}>
+                            {/* <View style={styles.fieldGroup}>
                                 <Text style={styles.label}>Location</Text>
                                 <TextInput
                                     style={styles.input}
@@ -178,12 +243,12 @@ export default function Add() {
                                 {touched.rooms && errors.rooms && (
                                     <Text style={styles.errorText}>{errors.rooms}</Text>
                                 )}
-                            </View>
+                            </View> */}
 
                             <View style={styles.fieldGroup}>
                                 <View style={styles.fieldHeader}>
                                     <Text style={styles.label}>Images</Text>
-                                    <Pressable style={styles.uploadButton} onPress={() => { }}>
+                                    <Pressable style={styles.uploadButton} onPress={onUpload}>
                                         <Text style={styles.uploadButtonText}>Upload Image</Text>
                                     </Pressable>
                                 </View>
@@ -200,7 +265,7 @@ export default function Add() {
                                 </View>
                             </View>
 
-                            <View style={styles.fieldGroup}>
+                            {/* <View style={styles.fieldGroup}>
                                 <Text style={styles.label}>Notes</Text>
                                 <TextInput
                                     style={[styles.input, styles.notesInput]}
@@ -215,7 +280,7 @@ export default function Add() {
                                 {touched.notes && errors.notes && (
                                     <Text style={styles.errorText}>{errors.notes}</Text>
                                 )}
-                            </View>
+                            </View> */}
 
                             <Pressable style={styles.submitButton} onPress={() => handleSubmit()}>
                                 <Text style={styles.submitButtonText}>Save Listing</Text>

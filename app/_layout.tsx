@@ -47,9 +47,9 @@ export default function RootLayout() {
         }}
       />
       <Tabs.Screen
-        name="add"
+        name="addeditform"
         options={{
-          title: "Add",
+          title: "Add/Edit",
           tabBarIcon: ({ focused }) => (
             <MaterialIcons
               name="add"
