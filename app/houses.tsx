@@ -1,19 +1,30 @@
 import { useHouses } from '@/contexts/HousesContext';
 import { Link } from "expo-router";
-import { FlatList, Image, Pressable, SafeAreaView, StyleSheet, Text, View } from "react-native";
+import { useEffect } from 'react';
+import { FlatList, Image, ImageSourcePropType, Pressable, SafeAreaView, StyleSheet, Text, View } from "react-native";
 
 const sample_houses = [
-    { id: "1", title: "Modern Loft", price: "$2,300/mo", location: "Downtown" },
-    { id: "2", title: "Cozy Bungalow", price: "$1,850/mo", location: "Maple Street" },
-    { id: "3", title: "Lake House", price: "$3,100/mo", location: "Harbor Bay" },
+    { id: "1", title: "Modern Loft", price: "$2,300/mo", location: "Downtown", createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+    { id: "2", title: "Cozy Bungalow", price: "$1,850/mo", location: "Maple Street", createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+    { id: "3", title: "Lake House", price: "$3,100/mo", location: "Harbor Bay", createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
     {
         id: "4", title: "Suburban Retreat", price: "$2,000/mo", location: "Cedar Grove",
-        image: require('../assets/images/open_home1.jpg')
+        image: require('../assets/images/open_home1.jpg'),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
     },
 ];
 
 export default function Houses() {
-    const { houses } = useHouses();
+    const { houses, saveHouses } = useHouses();
+
+    useEffect(
+        () => {
+            if (houses.length === 0) {
+                saveHouses(sample_houses)
+            }
+        },
+        []);
 
     return (
         <SafeAreaView style={styles.safeArea}>
@@ -37,7 +48,7 @@ export default function Houses() {
                     >
                         <Pressable style={styles.card}>
                             <View style={styles.imagePlaceholder}>
-                                <Image source={item.image} style={styles.image} />
+                                <Image source={item.image as ImageSourcePropType} style={styles.image} />
                             </View>
                             <View style={styles.cardContent}>
                                 <Text style={styles.houseTitle}>{item.title}</Text>

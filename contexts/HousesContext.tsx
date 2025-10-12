@@ -23,6 +23,7 @@ interface HousesContextType {
     addHouse: (house: Omit<House, 'id' | 'createdAt' | 'updatedAt'>) => void;
     updateHouse: (id: string, updates: Partial<House>) => void;
     deleteHouse: (id: string) => void;
+    saveHouses: (houses: House[]) => void;
 }
 
 const HousesContext = createContext<HousesContextType | undefined>(undefined);
@@ -82,7 +83,7 @@ export function HousesProvider({ children }: { children: React.ReactNode }) {
     };
 
     return (
-        <HousesContext.Provider value={{ houses, addHouse, updateHouse, deleteHouse }}>
+        <HousesContext.Provider value={{ houses, addHouse, updateHouse, deleteHouse, saveHouses }}>
             {children}
         </HousesContext.Provider>
     );
