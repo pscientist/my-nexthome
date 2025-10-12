@@ -1,100 +1,51 @@
 import { useState } from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
 
 export default function Settings() {
     const [metricUnit, setMetricUnit] = useState<'sqm' | 'sqft'>('sqm');
 
     return (
-        <View style={styles.container}>
-            <Text style={styles.title}>Settings</Text>
+        <View className="flex-1 bg-[#FFF9F3] p-5 pt-[60px]">
+            <Text className="text-[28px] font-bold text-[#765227] mb-[30px]">
+                Settings
+            </Text>
 
             {/* Metric Unit Section */}
-            <View style={styles.section}>
-                <Text style={styles.sectionTitle}>Area Measurement</Text>
+            <View className="bg-white rounded-xl p-5 shadow-lg shadow-[#B79C7F]/10">
+                <Text className="text-base font-semibold text-[#8C6D4A] mb-4">
+                    Area Measurement
+                </Text>
 
                 {/* Square Meters Option */}
                 <TouchableOpacity
-                    style={styles.radioOption}
+                    className="flex-row items-center py-3"
                     onPress={() => setMetricUnit('sqm')}
                 >
-                    <View style={styles.radioButton}>
+                    <View className="w-6 h-6 rounded-full border-2 border-[#8C6D4A] items-center justify-center mr-3">
                         {metricUnit === 'sqm' && (
-                            <View style={styles.radioButtonInner} />
+                            <View className="w-3 h-3 rounded-full bg-[#8C6D4A]" />
                         )}
                     </View>
-                    <Text style={styles.radioLabel}>Square Meters (m²)</Text>
+                    <Text className="text-base text-[#4A3C2B]">
+                        Square Meters (m²)
+                    </Text>
                 </TouchableOpacity>
 
                 {/* Square Feet Option */}
                 <TouchableOpacity
-                    style={styles.radioOption}
+                    className="flex-row items-center py-3"
                     onPress={() => setMetricUnit('sqft')}
                 >
-                    <View style={styles.radioButton}>
+                    <View className="w-6 h-6 rounded-full border-2 border-[#8C6D4A] items-center justify-center mr-3">
                         {metricUnit === 'sqft' && (
-                            <View style={styles.radioButtonInner} />
+                            <View className="w-3 h-3 rounded-full bg-[#8C6D4A]" />
                         )}
                     </View>
-                    <Text style={styles.radioLabel}>Square Feet (ft²)</Text>
+                    <Text className="text-base text-[#4A3C2B]">
+                        Square Feet (ft²)
+                    </Text>
                 </TouchableOpacity>
             </View>
         </View>
     );
 }
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: "#FFF9F3",
-        padding: 20,
-        paddingTop: 60,
-    },
-    title: {
-        fontSize: 28,
-        fontWeight: "bold",
-        color: "#765227",
-        marginBottom: 30,
-    },
-    section: {
-        backgroundColor: "#FFFFFF",
-        borderRadius: 12,
-        padding: 20,
-        shadowColor: "#B79C7F",
-        shadowOpacity: 0.1,
-        shadowOffset: { width: 0, height: 2 },
-        shadowRadius: 8,
-        elevation: 3,
-    },
-    sectionTitle: {
-        fontSize: 16,
-        fontWeight: "600",
-        color: "#8C6D4A",
-        marginBottom: 16,
-    },
-    radioOption: {
-        flexDirection: "row",
-        alignItems: "center",
-        paddingVertical: 12,
-    },
-    radioButton: {
-        width: 24,
-        height: 24,
-        borderRadius: 12,
-        borderWidth: 2,
-        borderColor: "#8C6D4A",
-        alignItems: "center",
-        justifyContent: "center",
-        marginRight: 12,
-    },
-    radioButtonInner: {
-        width: 12,
-        height: 12,
-        borderRadius: 6,
-        backgroundColor: "#8C6D4A",
-    },
-    radioLabel: {
-        fontSize: 16,
-        color: "#4A3C2B",
-    },
-});
-

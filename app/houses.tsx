@@ -1,7 +1,8 @@
+import { useHouses } from '@/contexts/HousesContext';
 import { Link } from "expo-router";
 import { FlatList, Image, Pressable, SafeAreaView, StyleSheet, Text, View } from "react-native";
 
-const houses = [
+const sample_houses = [
     { id: "1", title: "Modern Loft", price: "$2,300/mo", location: "Downtown" },
     { id: "2", title: "Cozy Bungalow", price: "$1,850/mo", location: "Maple Street" },
     { id: "3", title: "Lake House", price: "$3,100/mo", location: "Harbor Bay" },
@@ -12,6 +13,8 @@ const houses = [
 ];
 
 export default function Houses() {
+    const { houses } = useHouses();
+
     return (
         <SafeAreaView style={styles.safeArea}>
             <FlatList
