@@ -1,13 +1,15 @@
 import { useHouses } from "@/contexts/HousesContext";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { useEffect, useState } from "react";
 import { Image, Pressable, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function HouseDetails() {
     const router = useRouter();
     const { id } = useLocalSearchParams();
-    const { houses } = useHouses();
+    const { houses, updateHouse } = useHouses();
+    const [textNotes, setTextNotes] = useState("");
 
     const house = houses.find(h => h.id === id);
 
@@ -20,12 +22,17 @@ export default function HouseDetails() {
     }
 
     const { title, price, location, image, notes } = house;
-    const region = {
-        latitude: -36.8485, // Auckland latitude
-        longitude: 174.7633, // Auckland longitude
-        latitudeDelta: 0.05,
-        longitudeDelta: 0.05,
-    };
+
+    useEffect(() => {
+        if (house) {
+            setTextNotes(house.notes || "");
+        }
+    }, [house]);
+
+    const saveNotes = () => {
+        updateHouse(id as string, { notes: textNotes });
+        router.back();
+    }
 
     return (
         <SafeAreaView style={styles.safeArea}>
@@ -58,11 +65,11 @@ export default function HouseDetails() {
                     <Text style={styles.notesTitle}>Notes</Text>
                     <TextInput
                         placeholder="Enter your notes"
-                        value={notes || "???"}
+                        value={textNotes || ""}
                         style={styles.notesInput}
                         multiline
                         numberOfLines={4}
-                        editable={false}
+                        onChangeText={setTextNotes}
                     />
                 </View>
 
@@ -84,7 +91,7 @@ export default function HouseDetails() {
                     </View>
                 </View> */}
                 <View style={styles.saveButtonContainer}>
-                    <TouchableOpacity onPress={() => router.back()}>
+                    <TouchableOpacity onPress={saveNotes}>
                         <Text style={styles.saveButton}>Save</Text>
                     </TouchableOpacity>
                 </View>

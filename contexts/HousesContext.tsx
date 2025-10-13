@@ -66,7 +66,7 @@ export function HousesProvider({ children }: { children: React.ReactNode }) {
 
     const updateHouse = (id: string, updates: Partial<House>) => {
         const updatedHouses = houses.map(house =>
-            house.id === id
+            String(house.id) === String(id)
                 ? { ...house, ...updates, updatedAt: new Date().toISOString() }
                 : house
         );

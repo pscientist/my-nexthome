@@ -34,9 +34,9 @@ export default function Houses() {
 
     useEffect(
         () => {
-            // if (houses.length === 0) {
-            saveHouses(sample_houses)
-            // }
+            if (houses.length === 0) {
+                saveHouses(sample_houses)
+            }
         },
         [houses.length, saveHouses]);
 
