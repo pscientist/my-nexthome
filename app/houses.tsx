@@ -4,9 +4,21 @@ import { useEffect } from 'react';
 import { FlatList, Image, ImageSourcePropType, Pressable, SafeAreaView, StyleSheet, Text, View } from "react-native";
 
 const sample_houses = [
-    { id: "1", title: "Modern Loft", price: "$2,300/mo", location: "Downtown", createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-    { id: "2", title: "Cozy Bungalow", price: "$1,850/mo", location: "Maple Street", createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-    { id: "3", title: "Lake House", price: "$3,100/mo", location: "Harbor Bay", createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+    {
+        id: "1", title: "Modern Loft", price: "$2,300/mo", location: "Downtown",
+        image: require('../assets/images/open_home4.jpg'),
+        createdAt: new Date().toISOString(), updatedAt: new Date().toISOString()
+    },
+    {
+        id: "2", title: "Cozy Bungalow", price: "$1,850/mo", location: "Maple Street",
+        image: require('../assets/images/open_home3.jpg'),
+        createdAt: new Date().toISOString(), updatedAt: new Date().toISOString()
+    },
+    {
+        id: "3", title: "Lake House", price: "$3,100/mo", location: "Harbor Bay",
+        image: require('../assets/images/open_home2.jpg'),
+        createdAt: new Date().toISOString(), updatedAt: new Date().toISOString()
+    },
     {
         id: "4", title: "Suburban Retreat", price: "$2,000/mo", location: "Cedar Grove",
         image: require('../assets/images/open_home1.jpg'),
@@ -24,7 +36,7 @@ export default function Houses() {
                 saveHouses(sample_houses)
             }
         },
-        []);
+        [houses.length, saveHouses]);
 
     return (
         <SafeAreaView style={styles.safeArea}>

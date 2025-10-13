@@ -6,7 +6,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function HouseDetails() {
     const router = useRouter();
-    const { title = "House Title", price = "$0/mo", location = "—" } = useLocalSearchParams();
+    const { title = "House Title", price = "$0/mo", location = "—",
+        image = require("../assets/images/open_home1.jpg") } = useLocalSearchParams();
     const region = {
         latitude: -36.8485, // Auckland latitude
         longitude: 174.7633, // Auckland longitude
@@ -28,7 +29,7 @@ export default function HouseDetails() {
                 <View style={styles.photoBox}>
                     <Image
                         resizeMode="cover"
-                        source={require("../assets/images/open_home1.jpg")}
+                        source={image}
                         style={styles.photo}
                     />
                 </View>

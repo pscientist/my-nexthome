@@ -3,7 +3,13 @@ import { Tabs } from "expo-router";
 import { HousesProvider } from "../contexts/HousesContext";
 import "../global.css";
 
+// Load Reactotron only in development
+if (__DEV__) {
+  require("../config/reactotron");
+}
+
 export default function RootLayout() {
+
   return (
     <HousesProvider>
       <Tabs

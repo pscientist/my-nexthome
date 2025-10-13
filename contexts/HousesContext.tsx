@@ -1,12 +1,6 @@
 // contexts/HousesContext.tsx
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { MMKV } from 'react-native-mmkv';
-
-// Create storage instance (optionally with encryption)
-const storage = new MMKV({
-    id: 'househunt-storage',
-    // encryptionKey: 'your-encryption-key' // Optional: for sensitive data
-});
 
 interface House {
     id: string;
@@ -38,9 +32,9 @@ export function HousesProvider({ children }: { children: React.ReactNode }) {
         loadHouses();
     }, []);
 
-    const loadHouses = () => {
+    const loadHouses = async () => {
         try {
-            const data = storage.getString(HOUSES_KEY);
+            const data = await AsyncStorage.getItem(HOUSES_KEY);
             if (data) {
                 setHouses(JSON.parse(data));
             }
@@ -49,9 +43,9 @@ export function HousesProvider({ children }: { children: React.ReactNode }) {
         }
     };
 
-    const saveHouses = (newHouses: House[]) => {
+    const saveHouses = async (newHouses: House[]) => {
         try {
-            storage.set(HOUSES_KEY, JSON.stringify(newHouses));
+            await AsyncStorage.setItem(HOUSES_KEY, JSON.stringify(newHouses));
             setHouses(newHouses);
         } catch (error) {
             console.error('Error saving houses:', error);
