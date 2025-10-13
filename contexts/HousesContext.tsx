@@ -1,15 +1,17 @@
 // contexts/HousesContext.tsx
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { ImageSourcePropType } from 'react-native';
 
 interface House {
     id: string;
     title: string;
     price: string;
     location: string;
-    image?: string;
+    image?: ImageSourcePropType;
     createdAt: string;
     updatedAt: string;
+    notes: string;
 }
 
 interface HousesContextType {

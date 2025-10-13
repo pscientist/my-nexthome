@@ -1,29 +1,31 @@
 import { useHouses } from '@/contexts/HousesContext';
 import { Link } from "expo-router";
 import { useEffect } from 'react';
-import { FlatList, Image, ImageSourcePropType, Pressable, SafeAreaView, StyleSheet, Text, View } from "react-native";
+import { FlatList, Image, ImageSourcePropType, Pressable, StyleSheet, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const sample_houses = [
     {
         id: "1", title: "Modern Loft", price: "$2,300/mo", location: "Downtown",
-        image: require('../assets/images/open_home4.jpg'),
-        createdAt: new Date().toISOString(), updatedAt: new Date().toISOString()
+        image: require('@/assets/images/open_home4.jpg'),
+        createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), notes: "Love the view"
     },
     {
         id: "2", title: "Cozy Bungalow", price: "$1,850/mo", location: "Maple Street",
-        image: require('../assets/images/open_home3.jpg'),
-        createdAt: new Date().toISOString(), updatedAt: new Date().toISOString()
+        image: require('@/assets/images/open_home3.jpg'),
+        createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), notes: "Bedrooms are big!"
     },
     {
         id: "3", title: "Lake House", price: "$3,100/mo", location: "Harbor Bay",
-        image: require('../assets/images/open_home2.jpg'),
-        createdAt: new Date().toISOString(), updatedAt: new Date().toISOString()
+        image: require('@/assets/images/open_home2.jpg'),
+        createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), notes: "Kitchen is quite nice. Need carpet clean."
     },
     {
         id: "4", title: "Suburban Retreat", price: "$2,000/mo", location: "Cedar Grove",
-        image: require('../assets/images/open_home1.jpg'),
+        image: require('@/assets/images/open_home1.jpg'),
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
+        notes: "It's a bit too far from the city",
     },
 ];
 
@@ -32,9 +34,9 @@ export default function Houses() {
 
     useEffect(
         () => {
-            if (houses.length === 0) {
-                saveHouses(sample_houses)
-            }
+            // if (houses.length === 0) {
+            saveHouses(sample_houses)
+            // }
         },
         [houses.length, saveHouses]);
 
@@ -48,13 +50,14 @@ export default function Houses() {
                 ListHeaderComponentStyle={styles.header}
                 renderItem={({ item }) => (
                     <Link href={{
-                        pathname: '/house-details',
+                        pathname: '/houses/house-details',
                         params: {
                             id: item.id,
                             title: item.title,
                             price: item.price,
                             location: item.location,
-                            image: item.image
+                            image: item.image,
+                            notes: item.notes
                         }
                     }} asChild
                     >

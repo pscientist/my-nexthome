@@ -1,7 +1,12 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
+// import { NativeWindStyleSheet } from "nativewind";
 import { HousesProvider } from "../contexts/HousesContext";
 import "../global.css";
+
+// NativeWindStyleSheet.setOutput({
+// default: "native",
+// });
 
 // Load Reactotron only in development
 if (__DEV__) {
@@ -84,12 +89,6 @@ export default function RootLayout() {
             tabBarIcon: ({ color, size }) => (
               <MaterialIcons name="settings" size={size} color={color} />
             ),
-          }}
-        />
-        <Tabs.Screen
-          name="house-details"
-          options={{
-            href: null,
           }}
         />
       </Tabs>

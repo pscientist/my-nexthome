@@ -1,13 +1,25 @@
+import { useHouses } from "@/contexts/HousesContext";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { Image, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
-import MapView, { Marker } from 'react-native-maps';
+import { Image, Pressable, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function HouseDetails() {
     const router = useRouter();
-    const { title = "House Title", price = "$0/mo", location = "—",
-        image = require("../assets/images/open_home1.jpg") } = useLocalSearchParams();
+    const { id } = useLocalSearchParams();
+    const { houses } = useHouses();
+
+    const house = houses.find(h => h.id === id);
+
+    if (!house) {
+        return (
+            <SafeAreaView style={styles.safeArea}>
+                <Text>House not found</Text>
+            </SafeAreaView>
+        );
+    }
+
+    const { title, price, location, image, notes } = house;
     const region = {
         latitude: -36.8485, // Auckland latitude
         longitude: 174.7633, // Auckland longitude
@@ -35,14 +47,26 @@ export default function HouseDetails() {
                 </View>
 
                 <View style={styles.infoCard}>
-                    <Text style={styles.title}>{String(title)}</Text>
-                    <Text style={styles.price}>{String(price)}</Text>
+                    <Text style={styles.title}>{title}</Text>
+                    <Text style={styles.price}>{price}</Text>
                     <View style={styles.metaRow}>
-                        <Text style={styles.metaText}>{String(location)}</Text>
+                        <Text style={styles.metaText}>{location}</Text>
                     </View>
                 </View>
 
-                <View style={styles.mapCard}>
+                <View style={styles.notesCard}>
+                    <Text style={styles.notesTitle}>Notes</Text>
+                    <TextInput
+                        placeholder="Enter your notes"
+                        value={notes || "???"}
+                        style={styles.notesInput}
+                        multiline
+                        numberOfLines={4}
+                        editable={false}
+                    />
+                </View>
+
+                {/* <View style={styles.mapCard}>
                     <Text style={styles.mapTitle}>Location</Text>
                     <View style={styles.mapPlaceholder}>
                         <MapView
@@ -58,8 +82,12 @@ export default function HouseDetails() {
                             />
                         </MapView>
                     </View>
+                </View> */}
+                <View style={styles.saveButtonContainer}>
+                    <TouchableOpacity onPress={() => router.back()}>
+                        <Text style={styles.saveButton}>Save</Text>
+                    </TouchableOpacity>
                 </View>
-
             </ScrollView>
         </SafeAreaView>
     );
@@ -120,4 +148,33 @@ const styles = StyleSheet.create({
         borderWidth: 1, borderColor: "#D8C6B2", gap: 6, flex: 1,
     },
     mapPlaceholderText: { color: "#7C6655" },
+
+    notesCard: {
+        backgroundColor: "#FFF6EC", borderRadius: 16, padding: 16,
+        borderWidth: 1, borderColor: "#E0D0BD",
+        shadowColor: "#B79C7F", shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.12, shadowRadius: 12, elevation: 3, gap: 12
+    },
+    notesTitle: { fontSize: 16, fontWeight: "700", color: "#3A2F2F" },
+    notesInput: {
+        backgroundColor: "#FFFBF5",
+        borderRadius: 12,
+        padding: 12,
+        fontSize: 15,
+        color: "#47372C",
+        borderWidth: 1,
+        borderColor: "#E0D0BD",
+        minHeight: 100,
+        textAlignVertical: "top"
+    },
+    saveButtonContainer: {
+        padding: 12,
+        backgroundColor: "#FFF6EC",
+        borderRadius: 12,
+        alignItems: "center",
+        justifyContent: "center",
+    },
+    saveButton: {
+        fontSize: 16, fontWeight: "700", color: "#3A2F2F"
+    }
 });
