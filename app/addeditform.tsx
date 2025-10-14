@@ -1,8 +1,5 @@
-import { cdnUrl, uploadToCloudinary } from '@/utils/cloudinary';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import NetInfo from '@react-native-community/netinfo';
-import * as ImageManipulator from 'expo-image-manipulator';
-import * as ImagePicker from 'expo-image-picker';
 import { Formik } from 'formik';
 import { useEffect, useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
@@ -15,10 +12,9 @@ const LISTINGS_STORAGE_KEY = '@househunt_listings';
 // Types
 interface ListingFormValues {
     title: string;
-    // location: string;
-    // priceRange: string;
-    // rooms: string; 
-    // notes: string;
+    location: string;
+    priceRange: string;
+    rooms: string;
 }
 
 interface StoredListing extends ListingFormValues {
@@ -29,37 +25,23 @@ interface StoredListing extends ListingFormValues {
 }
 
 // Validation schema
-// const listingValidationSchema = Yup.object().shape({
-//     title: Yup.string()
-//         .min(3, 'Title must be at least 3 characters')
-//         .required('Title is required'),
-//     location: Yup.string()
-//         .min(3, 'Location must be at least 3 characters')
-//         .required('Location is required'),
-//     priceRange: Yup.string()
-//         .required('Price range is required'),
-//     rooms: Yup.string()
-//         .matches(/^[0-9]+$/, 'Must be a valid number')
-//         .required('Number of rooms is required'),
-//     notes: Yup.string()
-// });
-
 const listingValidationSchema = Yup.object().shape({
     title: Yup.string()
-        .min(3, 'Title must be at least 3 characters'),
+        .min(3, 'Title must be at least 3 characters')
+        .required('Title is required'),
     location: Yup.string()
-        .min(3, 'Location must be at least 3 characters'),
-    priceRange: Yup.string(),
+        .min(3, 'Location must be at least 3 characters')
+        .required('Location is required'),
+    priceRange: Yup.string()
+        .required('Price range is required'),
     rooms: Yup.string()
-        .matches(/^[0-9]+$/, 'Must be a valid number'),
-    notes: Yup.string()
+        .matches(/^[0-9]+$/, 'Must be a valid number')
+        .required('Number of rooms is required'),
 });
 
 export default function AddEditForm() {
     const [isConnected, setIsConnected] = useState<boolean | null>(null);
     const [uploading, setUploading] = useState(false);
-    const [fullUrl, setFullUrl] = useState<string | null>(null);
-    const [thumbUrl, setThumbUrl] = useState<string | null>(null);
 
     useEffect(() => {
         const unsubscribe = NetInfo.addEventListener(state => {
@@ -72,60 +54,59 @@ export default function AddEditForm() {
     }, []
     );
 
-    const onUpload = async () => {
-        try {
-            setUploading(true);
+    // const onUpload = async () => {
+    //     try {
+    //         setUploading(true);
 
-            // 1) Permission + pick
-            const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
-            if (!perm.granted) throw new Error('Permission to access photos is required.');;
+    //         // 1) Permission + pick
+    //         const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    //         if (!perm.granted) throw new Error('Permission to access photos is required.');;
 
-            const pick = await ImagePicker.launchImageLibraryAsync({
-                mediaTypes: ImagePicker.MediaTypeOptions.Images,
-                allowsEditing: false,
-                quality: 1,
-            });
-            if (pick.canceled) return;
+    //         const pick = await ImagePicker.launchImageLibraryAsync({
+    //             mediaTypes: ImagePicker.MediaTypeOptions.Images,
+    //             allowsEditing: false,
+    //             quality: 1,
+    //         });
+    //         if (pick.canceled) return;
 
-            const original = pick.assets[0].uri;
+    //         const original = pick.assets[0].uri;
 
-            // 2) (Optional) compress/normalize: to JPEG, max width 1600
-            const manip = await ImageManipulator.manipulateAsync(
-                original,
-                [{ resize: { width: 1600 } }],
-                { compress: 0.75, format: ImageManipulator.SaveFormat.JPEG }
-            );
+    //         // 2) (Optional) compress/normalize: to JPEG, max width 1600
+    //         const manip = await ImageManipulator.manipulateAsync(
+    //             original,
+    //             [{ resize: { width: 1600 } }],
+    //             { compress: 0.75, format: ImageManipulator.SaveFormat.JPEG }
+    //         );
 
-            // 3) Upload to Cloudinary (unsigned)
-            const result = await uploadToCloudinary({
-                fileUri: manip.uri,
-                folder: 'mynexthome', // e.g., per listing/user
-            });
+    //         // 3) Upload to Cloudinary (unsigned)
+    //         const result = await uploadToCloudinary({
+    //             fileUri: manip.uri,
+    //             folder: 'mynexthome', // e.g., per listing/user
+    //         });
 
-            // 4) Build optimized URLs (Edge-transformed)
-            const bestForFeed = cdnUrl(result.public_id, { w: 1200 });   // large display
-            const tinyThumb = cdnUrl(result.public_id, { w: 400 });    // thumbnail
+    //         // 4) Build optimized URLs (Edge-transformed)
+    //         const bestForFeed = cdnUrl(result.public_id, { w: 1200 });   // large display
+    //         const tinyThumb = cdnUrl(result.public_id, { w: 400 });    // thumbnail
 
-            setFullUrl(bestForFeed);
-            setThumbUrl(tinyThumb);
+    //         setFullUrl(bestForFeed);
+    //         setThumbUrl(tinyThumb);
 
-            Alert.alert('Uploaded!', 'Your photo is live on the CDN.');
+    //         Alert.alert('Uploaded!', 'Your photo is live on the CDN.');
 
-        } catch (e: any) {
-            console.error(e);
-            Alert.alert('Upload failed', e.message ?? 'Unknown error');
+    //     } catch (e: any) {
+    //         console.error(e);
+    //         Alert.alert('Upload failed', e.message ?? 'Unknown error');
 
-        } finally {
-            setUploading(false);
-        }
-    }
+    //     } finally {
+    //         setUploading(false);
+    //     }
+    // }
 
     const initialValues: ListingFormValues = {
         title: '',
-        // location: '',
-        // priceRange: '',
-        // rooms: '',
-        // notes: '',
+        location: '',
+        priceRange: '',
+        rooms: '',
     };
 
     const handleSubmit = async (values: ListingFormValues, { resetForm }: any) => {
@@ -160,6 +141,8 @@ export default function AddEditForm() {
 
             // Reset the form
             resetForm();
+
+            router.back();
 
         } catch (error) {
             console.error('Error saving listing:', error);
@@ -199,7 +182,7 @@ export default function AddEditForm() {
                                 )}
                             </View>
 
-                            {/* <View style={styles.fieldGroup}>
+                            <View style={styles.fieldGroup}>
                                 <Text style={styles.label}>Location</Text>
                                 <TextInput
                                     style={styles.input}
@@ -243,9 +226,9 @@ export default function AddEditForm() {
                                 {touched.rooms && errors.rooms && (
                                     <Text style={styles.errorText}>{errors.rooms}</Text>
                                 )}
-                            </View> */}
+                            </View>
 
-                            <View style={styles.fieldGroup}>
+                            {/* <View style={styles.fieldGroup}>
                                 <View style={styles.fieldHeader}>
                                     <Text style={styles.label}>Images</Text>
                                     <Pressable style={styles.uploadButton} onPress={onUpload}>
@@ -263,23 +246,6 @@ export default function AddEditForm() {
                                         <Text style={styles.imagePlaceholderText}>Image 3</Text>
                                     </View>
                                 </View>
-                            </View>
-
-                            {/* <View style={styles.fieldGroup}>
-                                <Text style={styles.label}>Notes</Text>
-                                <TextInput
-                                    style={[styles.input, styles.notesInput]}
-                                    placeholder="Add viewing notes, highlights, or questions"
-                                    placeholderTextColor="#B79C7F"
-                                    multiline
-                                    textAlignVertical="top"
-                                    onChangeText={handleChange('notes')}
-                                    onBlur={handleBlur('notes')}
-                                    value={values.notes}
-                                />
-                                {touched.notes && errors.notes && (
-                                    <Text style={styles.errorText}>{errors.notes}</Text>
-                                )}
                             </View> */}
 
                             <Pressable style={styles.submitButton} onPress={() => handleSubmit()}>
