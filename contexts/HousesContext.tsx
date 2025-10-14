@@ -10,6 +10,7 @@ interface House {
     location: string;
     rooms: number;
     image?: ImageSourcePropType;
+    open_date: string; // it'll be an array later
     createdAt: string;
     updatedAt: string;
     notes: string;

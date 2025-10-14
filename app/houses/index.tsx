@@ -8,21 +8,25 @@ const sample_houses = [
     {
         id: "1", title: "Modern Loft", price: "$2,300/mo", location: "Downtown",
         image: require('@/assets/images/open_home4.jpg'),
+        open_date: new Date('2025-10-20').toISOString(),
         createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), notes: "Love the view", rooms: 2
     },
     {
         id: "2", title: "Cozy Bungalow", price: "$1,850/mo", location: "Maple Street",
         image: require('@/assets/images/open_home3.jpg'),
+        open_date: new Date('2025-10-18').toISOString(),
         createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), notes: "Bedrooms are big!", rooms: 3
     },
     {
         id: "3", title: "Lake House", price: "$3,100/mo", location: "Harbor Bay",
         image: require('@/assets/images/open_home2.jpg'),
+        open_date: new Date('2025-10-16').toISOString(),
         createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), notes: "Kitchen is quite nice. Need carpet clean.", rooms: 4
     },
     {
         id: "4", title: "Suburban Retreat", price: "$2,000/mo", location: "Cedar Grove",
         image: require('@/assets/images/open_home1.jpg'),
+        open_date: new Date('2025-10-21').toISOString(),
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         notes: "It's a bit too far from the city",
@@ -57,6 +61,7 @@ export default function Houses() {
                             title: item.title,
                             price: item.price,
                             location: item.location,
+                            open_date: item.open_date,
                             notes: item.notes
                         }
                     }} asChild
@@ -69,6 +74,7 @@ export default function Houses() {
                                 <Text style={styles.houseTitle}>{item.title}</Text>
                                 <Text style={styles.housePrice}>{item.price}</Text>
                                 <Text style={styles.houseLocation}>{item.location}</Text>
+                                <Text style={styles.houseOpenDate}>{item.open_date}</Text>
                             </View>
                         </Pressable>
                     </Link>
@@ -121,4 +127,5 @@ const styles = StyleSheet.create({
     houseTitle: { fontSize: 18, fontWeight: "600", marginBottom: 8, color: "#47372C" },
     housePrice: { fontSize: 16, fontWeight: "600", color: "#C97A40", marginBottom: 6 },
     houseLocation: { fontSize: 14, color: "#7C6655", letterSpacing: 0.5, textTransform: "uppercase" },
+    houseOpenDate: { fontSize: 14, color: "#7C6655", letterSpacing: 0.5, textTransform: "uppercase" },
 });

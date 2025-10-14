@@ -1,4 +1,5 @@
-import React, { useCallback, useMemo, useState } from "react";
+import { useHouses } from '@/contexts/HousesContext';
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { FlatList, Pressable, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -16,11 +17,26 @@ import { Calendar } from "react-native-calendars";
 
 export default function CalendarScreen() {
     const [selected, setSelected] = useState<string>(new Date().toISOString().slice(0, 10));
+    const { houses } = useHouses();
 
     // Example local “events” to show how marking works (replace with your data shape later)
     const [events, setEvents] = useState<EventsByDate>({
-        // "2025-10-12": ["Open Home: 23 Rose St", "Viewing: 2:30 PM"],
+        "2025-10-12": ["Open Home: 23 Rose St", "Viewing: 2:30 PM"],
     });
+
+    useEffect(() => {
+        if (houses.length > 0) {
+            const byDate = houses.reduce<EventsByDate>((acc, house) => {
+                const key = house.open_date.slice(0, 10);
+                (acc[key] ||= []).push(house.title + " at " + house.location);
+                return acc;
+            }, {});
+            setEvents(byDate);
+        }
+
+    }, [houses]);
+
+    console.log(events);
 
     const onDayPress = useCallback((day: DateObject) => {
         setSelected(day.dateString);
