@@ -3,6 +3,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { Image, Pressable, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import MapView, { Marker } from 'react-native-maps';
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function HouseDetails() {
@@ -10,6 +11,12 @@ export default function HouseDetails() {
     const { id } = useLocalSearchParams();
     const { houses, updateHouse } = useHouses();
     const [textNotes, setTextNotes] = useState("");
+    const [region, setRegion] = useState({
+        latitude: -36.8485,
+        longitude: 174.7633,
+        latitudeDelta: 0.005,
+        longitudeDelta: 0.005
+    });
 
     const house = houses.find(h => h.id === id);
 
@@ -73,7 +80,7 @@ export default function HouseDetails() {
                     />
                 </View>
 
-                {/* <View style={styles.mapCard}>
+                <View style={styles.mapCard}>
                     <Text style={styles.mapTitle}>Location</Text>
                     <View style={styles.mapPlaceholder}>
                         <MapView
@@ -89,7 +96,7 @@ export default function HouseDetails() {
                             />
                         </MapView>
                     </View>
-                </View> */}
+                </View>
                 <View style={styles.saveButtonContainer}>
                     <TouchableOpacity onPress={saveNotes}>
                         <Text style={styles.saveButton}>Save</Text>

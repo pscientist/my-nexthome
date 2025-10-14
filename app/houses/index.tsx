@@ -8,17 +8,17 @@ const sample_houses = [
     {
         id: "1", title: "Modern Loft", price: "$2,300/mo", location: "Downtown",
         image: require('@/assets/images/open_home4.jpg'),
-        createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), notes: "Love the view"
+        createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), notes: "Love the view", rooms: 2
     },
     {
         id: "2", title: "Cozy Bungalow", price: "$1,850/mo", location: "Maple Street",
         image: require('@/assets/images/open_home3.jpg'),
-        createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), notes: "Bedrooms are big!"
+        createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), notes: "Bedrooms are big!", rooms: 3
     },
     {
         id: "3", title: "Lake House", price: "$3,100/mo", location: "Harbor Bay",
         image: require('@/assets/images/open_home2.jpg'),
-        createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), notes: "Kitchen is quite nice. Need carpet clean."
+        createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), notes: "Kitchen is quite nice. Need carpet clean.", rooms: 4
     },
     {
         id: "4", title: "Suburban Retreat", price: "$2,000/mo", location: "Cedar Grove",
@@ -26,6 +26,7 @@ const sample_houses = [
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         notes: "It's a bit too far from the city",
+        rooms: 3
     },
 ];
 
@@ -56,7 +57,6 @@ export default function Houses() {
                             title: item.title,
                             price: item.price,
                             location: item.location,
-                            image: item.image,
                             notes: item.notes
                         }
                     }} asChild

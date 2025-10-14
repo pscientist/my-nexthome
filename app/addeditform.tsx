@@ -1,28 +1,19 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useHouses } from '@/contexts/HousesContext';
 import NetInfo from '@react-native-community/netinfo';
+import { router } from 'expo-router';
 import { Formik } from 'formik';
 import { useEffect, useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Yup from 'yup';
 
-// Storage key
-const LISTINGS_STORAGE_KEY = '@househunt_listings';
-
-// Types
-interface ListingFormValues {
-    title: string;
-    location: string;
-    priceRange: string;
-    rooms: string;
-}
-
-interface StoredListing extends ListingFormValues {
-    id: string;
-    createdAt: string;
-    updatedAt: string;
-    synced: boolean;
-}
+// Initial form values
+const initialValues = {
+    title: '',
+    location: '',
+    priceRange: '',
+    rooms: '',
+};
 
 // Validation schema
 const listingValidationSchema = Yup.object().shape({
@@ -42,6 +33,7 @@ const listingValidationSchema = Yup.object().shape({
 export default function AddEditForm() {
     const [isConnected, setIsConnected] = useState<boolean | null>(null);
     const [uploading, setUploading] = useState(false);
+    const { addHouse } = useHouses();
 
     useEffect(() => {
         const unsubscribe = NetInfo.addEventListener(state => {
@@ -54,88 +46,21 @@ export default function AddEditForm() {
     }, []
     );
 
-    // const onUpload = async () => {
-    //     try {
-    //         setUploading(true);
-
-    //         // 1) Permission + pick
-    //         const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    //         if (!perm.granted) throw new Error('Permission to access photos is required.');;
-
-    //         const pick = await ImagePicker.launchImageLibraryAsync({
-    //             mediaTypes: ImagePicker.MediaTypeOptions.Images,
-    //             allowsEditing: false,
-    //             quality: 1,
-    //         });
-    //         if (pick.canceled) return;
-
-    //         const original = pick.assets[0].uri;
-
-    //         // 2) (Optional) compress/normalize: to JPEG, max width 1600
-    //         const manip = await ImageManipulator.manipulateAsync(
-    //             original,
-    //             [{ resize: { width: 1600 } }],
-    //             { compress: 0.75, format: ImageManipulator.SaveFormat.JPEG }
-    //         );
-
-    //         // 3) Upload to Cloudinary (unsigned)
-    //         const result = await uploadToCloudinary({
-    //             fileUri: manip.uri,
-    //             folder: 'mynexthome', // e.g., per listing/user
-    //         });
-
-    //         // 4) Build optimized URLs (Edge-transformed)
-    //         const bestForFeed = cdnUrl(result.public_id, { w: 1200 });   // large display
-    //         const tinyThumb = cdnUrl(result.public_id, { w: 400 });    // thumbnail
-
-    //         setFullUrl(bestForFeed);
-    //         setThumbUrl(tinyThumb);
-
-    //         Alert.alert('Uploaded!', 'Your photo is live on the CDN.');
-
-    //     } catch (e: any) {
-    //         console.error(e);
-    //         Alert.alert('Upload failed', e.message ?? 'Unknown error');
-
-    //     } finally {
-    //         setUploading(false);
-    //     }
-    // }
-
-    const initialValues: ListingFormValues = {
-        title: '',
-        location: '',
-        priceRange: '',
-        rooms: '',
-    };
-
-    const handleSubmit = async (values: ListingFormValues, { resetForm }: any) => {
+    const handleSubmit = async (values: any, { resetForm }: any) => {
         try {
-            // Create a new listing with metadata
-            const newListing: StoredListing = {
-                ...values,
-                id: Date.now().toString(), // Simple ID generation
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString(),
-                synced: false, // Not yet synced to server
-            };
-
-            // Get existing listings from AsyncStorage
-            const existingData = await AsyncStorage.getItem(LISTINGS_STORAGE_KEY);
-            const listings: StoredListing[] = existingData ? JSON.parse(existingData) : [];
-
-            // Add new listing to the array
-            listings.push(newListing);
-
-            // Save back to AsyncStorage
-            await AsyncStorage.setItem(LISTINGS_STORAGE_KEY, JSON.stringify(listings));
-
-            console.log('Listing saved successfully:', newListing);
+            addHouse({
+                title: values.title,
+                location: values.location,
+                price: values.priceRange,
+                rooms: parseInt(values.rooms),
+                notes: '',
+                image: undefined,
+            });
 
             // Show success message
             Alert.alert(
                 'Success',
-                'Listing saved locally! It will be synced to the server later.',
+                'House added successfully!',
                 [{ text: 'OK' }]
             );
 
@@ -145,10 +70,10 @@ export default function AddEditForm() {
             router.back();
 
         } catch (error) {
-            console.error('Error saving listing:', error);
+            console.error('Error saving house:', error);
             Alert.alert(
                 'Error',
-                'Failed to save listing. Please try again.',
+                'Failed to save house. Please try again.',
                 [{ text: 'OK' }]
             );
         }
@@ -178,7 +103,7 @@ export default function AddEditForm() {
                                     value={values.title}
                                 />
                                 {touched.title && errors.title && (
-                                    <Text style={styles.errorText}>{errors.title}</Text>
+                                    <Text style={styles.errorText}>{String(errors.title)}</Text>
                                 )}
                             </View>
 
@@ -193,7 +118,7 @@ export default function AddEditForm() {
                                     value={values.location}
                                 />
                                 {touched.location && errors.location && (
-                                    <Text style={styles.errorText}>{errors.location}</Text>
+                                    <Text style={styles.errorText}>{String(errors.location)}</Text>
                                 )}
                             </View>
 
@@ -208,7 +133,7 @@ export default function AddEditForm() {
                                     value={values.priceRange}
                                 />
                                 {touched.priceRange && errors.priceRange && (
-                                    <Text style={styles.errorText}>{errors.priceRange}</Text>
+                                    <Text style={styles.errorText}>{String(errors.priceRange)}</Text>
                                 )}
                             </View>
 
@@ -224,7 +149,7 @@ export default function AddEditForm() {
                                     value={values.rooms}
                                 />
                                 {touched.rooms && errors.rooms && (
-                                    <Text style={styles.errorText}>{errors.rooms}</Text>
+                                    <Text style={styles.errorText}>{String(errors.rooms)}</Text>
                                 )}
                             </View>
 

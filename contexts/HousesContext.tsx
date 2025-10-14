@@ -8,6 +8,7 @@ interface House {
     title: string;
     price: string;
     location: string;
+    rooms: number;
     image?: ImageSourcePropType;
     createdAt: string;
     updatedAt: string;
