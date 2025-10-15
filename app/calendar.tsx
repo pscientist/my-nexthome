@@ -27,7 +27,9 @@ export default function CalendarScreen() {
     useEffect(() => {
         if (houses.length > 0) {
             const byDate = houses.reduce<EventsByDate>((acc, house) => {
-                const key = house.open_date.slice(0, 10);
+                const key = house.open_date?.slice(0, 10);
+                if (!key) return acc;
+
                 (acc[key] ||= []).push(house.title + " at " + house.location);
                 return acc;
             }, {});
