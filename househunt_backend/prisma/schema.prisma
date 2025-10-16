@@ -1,0 +1,31 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Agent {
+  id       Int     @id @default(autoincrement())
+  name     String
+  email    String  @unique
+  phone    String?
+  listings House[]
+}
+
+model House {
+  id         Int      @id @default(autoincrement())
+  title      String
+  price      Int
+  bedrooms   Int
+  bathrooms  Int
+  location   String
+  imageUrl   String?
+  notes      String?
+  createdAt  DateTime @default(now())
+
+  agentId Int
+  agent   Agent   @relation(fields: [agentId], references: [id])
+}
