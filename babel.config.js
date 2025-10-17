@@ -6,6 +6,13 @@ module.exports = function (api) {
       'expo-router/babel',
       // NativeWind v4 usually works without this, but adding it avoids edge cases:
       // 'nativewind/babel',
+      [
+        '@tamagui/babel-plugin',
+        {
+          components: ['@tamagui/core'],
+          config: './tamagui.config.ts',
+        },
+      ],
     ],
   };
 };

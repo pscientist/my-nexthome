@@ -9,7 +9,9 @@ const sample_houses = [
         id: "1", title: "Modern Loft", price: "$2,300/mo", location: "Downtown",
         image: require('@/assets/images/open_home4.jpg'),
         open_date: new Date('2025-10-20').toISOString(),
-        createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), notes: "Love the view", rooms: 2
+        createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(),
+        notes: "Love the view",
+        rooms: 2
     },
     {
         id: "2", title: "Cozy Bungalow", price: "$1,850/mo", location: "Maple Street",

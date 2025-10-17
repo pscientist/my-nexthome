@@ -20,6 +20,9 @@
     "@react-navigation/bottom-tabs": "^7.4.0",
     "@react-navigation/elements": "^2.6.3",
     "@react-navigation/native": "^7.1.8",
+    "@tamagui/config": "^1.135.3",
+    "@tamagui/core": "^1.135.3",
+    "@tamagui/text": "^1.135.3",
     "expo": "~54.0.10",
     "expo-calendar": "~15.0.7",
     "expo-constants": "~18.0.9",
@@ -52,6 +55,9 @@
     "yup": "^1.7.1"
   },
   "devDependencies": {
+    "@tamagui/animations-react-native": "^1.135.3",
+    "@tamagui/babel-plugin": "^1.135.3",
+    "@tamagui/metro-plugin": "^1.135.3",
     "@testing-library/jest-native": "^5.4.3",
     "@testing-library/react-native": "^13.3.3",
     "@types/jest": "^30.0.0",

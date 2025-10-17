@@ -1,51 +1,101 @@
+import { Stack, Text } from '@tamagui/core';
 import { useState } from "react";
-import { Text, TouchableOpacity, View } from "react-native";
+import { TouchableOpacity } from "react-native";
 
 export default function Settings() {
     const [metricUnit, setMetricUnit] = useState<'sqm' | 'sqft'>('sqm');
 
     return (
-        <View className="flex-1 bg-[#FFF9F3] p-5 pt-[60px]">
-            <Text className="text-[28px] font-bold text-[#765227] mb-[30px]">
+        <Stack
+            flex={1}
+            backgroundColor="#FFF9F3"
+            padding="$5"
+            paddingTop="$15"
+        >
+            <Text
+                fontSize="$8"
+                fontWeight="bold"
+                color="#765227"
+                marginBottom="$8"
+            >
                 Settings
             </Text>
 
             {/* Metric Unit Section */}
-            <View className="bg-white rounded-xl p-5 shadow-lg shadow-[#B79C7F]/10">
-                <Text className="text-base font-semibold text-[#8C6D4A] mb-4">
+            <Stack
+                backgroundColor="white"
+                borderRadius="$4"
+                padding="$5"
+                shadowColor="#B79C7F"
+                shadowOpacity={0.1}
+                shadowRadius={8}
+                shadowOffset={{ width: 0, height: 4 }}
+            >
+                <Text
+                    fontSize="$4"
+                    fontWeight="600"
+                    color="#8C6D4A"
+                    marginBottom="$4"
+                >
                     Area Measurement
                 </Text>
 
                 {/* Square Meters Option */}
-                <TouchableOpacity
-                    className="flex-row items-center py-3"
-                    onPress={() => setMetricUnit('sqm')}
-                >
-                    <View className="w-6 h-6 rounded-full border-2 border-[#8C6D4A] items-center justify-center mr-3">
-                        {metricUnit === 'sqm' && (
-                            <View className="w-3 h-3 rounded-full bg-[#8C6D4A]" />
-                        )}
-                    </View>
-                    <Text className="text-base text-[#4A3C2B]">
-                        Square Meters (m²)
-                    </Text>
+                <TouchableOpacity onPress={() => setMetricUnit('sqm')}>
+                    <Stack flexDirection="row" alignItems="center" paddingVertical="$3">
+                        <Stack
+                            width="$1.5"
+                            height="$1.5"
+                            borderRadius="$10"
+                            borderWidth={2}
+                            borderColor="#8C6D4A"
+                            alignItems="center"
+                            justifyContent="center"
+                            marginRight="$3"
+                        >
+                            {metricUnit === 'sqm' && (
+                                <Stack
+                                    width="$0.75"
+                                    height="$0.75"
+                                    borderRadius="$10"
+                                    backgroundColor="#8C6D4A"
+                                />
+                            )}
+                        </Stack>
+                        <Text fontSize="$4" color="#4A3C2B">
+                            Square Meters (m²)
+                        </Text>
+                    </Stack>
                 </TouchableOpacity>
 
                 {/* Square Feet Option */}
-                <TouchableOpacity
-                    className="flex-row items-center py-3"
-                    onPress={() => setMetricUnit('sqft')}
-                >
-                    <View className="w-6 h-6 rounded-full border-2 border-[#8C6D4A] items-center justify-center mr-3">
-                        {metricUnit === 'sqft' && (
-                            <View className="w-3 h-3 rounded-full bg-[#8C6D4A]" />
-                        )}
-                    </View>
-                    <Text className="text-base text-[#4A3C2B]">
-                        Square Feet (ft²)
-                    </Text>
+                <TouchableOpacity onPress={() => setMetricUnit('sqft')}>
+                    <Stack flexDirection="row" alignItems="center" paddingVertical="$3">
+                        <Stack
+                            width="$1.5"
+                            height="$1.5"
+                            borderRadius="$10"
+                            borderWidth={2}
+                            borderColor="#8C6D4A"
+                            alignItems="center"
+                            justifyContent="center"
+                            marginRight="$3"
+                        >
+                            {metricUnit === 'sqft' && (
+                                <Stack
+                                    width="$0.75"
+                                    height="$0.75"
+                                    borderRadius="$10"
+                                    backgroundColor="#8C6D4A"
+                                />
+                            )}
+                        </Stack>
+                        <Text fontSize="$4" color="#4A3C2B">
+                            Square Feet (ft²)
+                        </Text>
+                    </Stack>
                 </TouchableOpacity>
-            </View>
-        </View>
+            </Stack>
+        </Stack>
     );
 }
