@@ -6,29 +6,33 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 const sample_houses = [
     {
-        id: "1", title: "Modern Loft", price: "$2,300/mo", location: "Downtown",
+        id: "1", title: "Modern Loft", price: "$799,000", location: "88 Kyber Pass Rd, Newmarket",
         image: require('@/assets/images/open_home4.jpg'),
-        open_date: new Date('2025-10-20').toISOString(),
+        open_date: '2025-10-20',
+        open_time: '14:00',
         createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(),
         notes: "Love the view",
         rooms: 2
     },
     {
-        id: "2", title: "Cozy Bungalow", price: "$1,850/mo", location: "Maple Street",
+        id: "2", title: "Cozy Bungalow", price: "$1.1 million", location: "3 Maple Street, Freemands Bay",
         image: require('@/assets/images/open_home3.jpg'),
-        open_date: new Date('2025-10-18').toISOString(),
+        open_date: '2025-10-18',
+        open_time: '11:00',
         createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), notes: "Bedrooms are big!", rooms: 3
     },
     {
-        id: "3", title: "Lake House", price: "$3,100/mo", location: "Harbor Bay",
+        id: "3", title: "Lake House", price: "$779,000", location: "33 Field Tce, Northcote",
         image: require('@/assets/images/open_home2.jpg'),
-        open_date: new Date('2025-10-16').toISOString(),
+        open_date: '2025-10-16',
+        open_time: '14:00',
         createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), notes: "Kitchen is quite nice. Need carpet clean.", rooms: 4
     },
     {
-        id: "4", title: "Suburban Retreat", price: "$2,000/mo", location: "Cedar Grove",
+        id: "4", title: "Suburban Retreat", price: "$899,000", location: "189 Great North Rd, Grey Lynn",
         image: require('@/assets/images/open_home1.jpg'),
-        open_date: new Date('2025-10-21').toISOString(),
+        open_date: '2025-10-21',
+        open_time: '14:00',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         notes: "It's a bit too far from the city",
@@ -42,8 +46,9 @@ export default function Houses() {
     useEffect(
         () => {
             if (houses.length === 0) {
-                saveHouses(sample_houses)
+                saveHouses(sample_houses);
             }
+            // saveHouses(sample_houses);
         },
         [houses.length, saveHouses]);
 
@@ -64,6 +69,7 @@ export default function Houses() {
                             price: item.price,
                             location: item.location,
                             open_date: item.open_date,
+                            open_time: item.open_time,
                             notes: item.notes
                         }
                     }} asChild
@@ -77,6 +83,8 @@ export default function Houses() {
                                 <Text style={styles.housePrice}>{item.price}</Text>
                                 <Text style={styles.houseLocation}>{item.location}</Text>
                                 <Text style={styles.houseOpenDate}>{item.open_date}</Text>
+                                <Text style={styles.houseOpenDate}>{item.open_time}</Text>
+
                             </View>
                         </Pressable>
                     </Link>

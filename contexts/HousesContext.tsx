@@ -11,6 +11,7 @@ interface House {
     rooms: number;
     image?: ImageSourcePropType;
     open_date: string; // it'll be an array later
+    open_time: string;
     createdAt: string;
     updatedAt: string;
     notes: string;
