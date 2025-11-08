@@ -1,7 +1,31 @@
-import { StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { useHouses } from '@/contexts/HousesContext';
+import { useState } from 'react';
+
 export default function Index() {
+  const [isSyncing, setIsSyncing] = useState(false);
+  const { houses, syncToServer } = useHouses();
+
+  const handleSync = async () => {
+    setIsSyncing(true);
+
+    try {
+      const result = await syncToServer();
+      if (result.success) {
+        console.log(`Successfully synced ${houses.length} houses to server.`);
+      } else {
+        console.log('Sync failed...', result.errorMsg || 'error...');
+      }
+
+    } catch (error) {
+      Alert.alert('Error', 'An unexpected error happened');
+    } finally {
+      setIsSyncing(false);
+    }
+  }
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
@@ -32,12 +56,45 @@ export default function Index() {
           </Text>
           <Text style={styles.cardFooter}>You’ve got this.</Text>
         </View>
+
+
+        <Pressable onPress={handleSync} disabled={isSyncing} style={[styles.syncButton, isSyncing && styles.syncButtonDisabled]}>
+          {isSyncing ?
+            (<ActivityIndicator size="small" color="#FFF6EC" />) : (<Text>Sync to Server</Text>)
+          }
+        </Pressable>
       </View>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  syncButton: {
+    backgroundColor: "#C97A40",
+    paddingVertical: 16,
+    paddingHorizontal: 24,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 8,
+    shadowColor: "#B79C7F",
+    shadowOpacity: 0.2,
+    shadowOffset: { width: 0, height: 4 },
+    shadowRadius: 8,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: "#B86A30",
+    minHeight: 52,
+  },
+  syncButtonDisabled: {
+    opacity: 0.6,
+  },
+  syncButtonText: {
+    color: "#FFF6EC",
+    fontSize: 16,
+    fontWeight: "600",
+    letterSpacing: 0.5,
+  },
   safeArea: {
     flex: 1,
     backgroundColor: "#F2E9DC",

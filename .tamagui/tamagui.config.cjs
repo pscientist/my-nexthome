@@ -1900,8 +1900,8 @@ var tokens2 = (0, import_web.createTokens)({
 });
 
 // node_modules/@tamagui/constants/dist/esm/constants.mjs
-var import_react = require("react");
-var import_react2 = require("react");
+var import_react = __toESM(require("react"), 1);
+var IS_REACT_19 = typeof import_react.default.use < "u";
 var isWeb = true;
 var isWindowDefined = typeof window < "u";
 var isServer = isWeb && !isWindowDefined;
@@ -1912,11 +1912,11 @@ var isWebTouchable = isClient && ("ontouchstart" in window || navigator.maxTouch
 var isIos = process.env.TEST_NATIVE_PLATFORM === "ios";
 
 // node_modules/@tamagui/use-presence/dist/esm/PresenceContext.mjs
-var React = __toESM(require("react"), 1);
+var React2 = __toESM(require("react"), 1);
 var import_jsx_runtime = require("react/jsx-runtime");
-var PresenceContext = React.createContext(null);
+var PresenceContext = React2.createContext(null);
 var ResetPresence = /* @__PURE__ */ __name((props) => {
-  const parent = React.useContext(PresenceContext);
+  const parent = React2.useContext(PresenceContext);
   return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(PresenceContext.Provider, {
     value: props.disable ? parent : null,
     children: props.children
@@ -1924,9 +1924,9 @@ var ResetPresence = /* @__PURE__ */ __name((props) => {
 }, "ResetPresence");
 
 // node_modules/@tamagui/use-presence/dist/esm/usePresence.mjs
-var React2 = __toESM(require("react"), 1);
+var React3 = __toESM(require("react"), 1);
 function usePresence() {
-  const context = React2.useContext(PresenceContext);
+  const context = React3.useContext(PresenceContext);
   if (!context) return [true, null, context];
   const {
     id,
@@ -1934,13 +1934,13 @@ function usePresence() {
     onExitComplete,
     register
   } = context;
-  return React2.useEffect(() => register(id), []), !isPresent2 && onExitComplete ? [false, () => onExitComplete?.(id), context] : [true, void 0, context];
+  return React3.useEffect(() => register(id), []), !isPresent2 && onExitComplete ? [false, () => onExitComplete?.(id), context] : [true, void 0, context];
 }
 __name(usePresence, "usePresence");
 
 // node_modules/@tamagui/animations-css/dist/esm/createAnimations.mjs
 var import_web2 = require("@tamagui/core");
-var import_react3 = __toESM(require("react"), 1);
+var import_react2 = __toESM(require("react"), 1);
 function extractDuration(animation) {
   const msMatch = animation.match(/(\d+(?:\.\d+)?)\s*ms/);
   if (msMatch) return Number.parseInt(msMatch[1], 10);
@@ -1956,7 +1956,7 @@ function createAnimations(animations) {
     ResetPresence,
     supportsCSS: true,
     useAnimatedNumber(initial) {
-      const [val, setVal] = import_react3.default.useState(initial), [onFinish, setOnFinish] = (0, import_react3.useState)();
+      const [val, setVal] = import_react2.default.useState(initial), [onFinish, setOnFinish] = (0, import_react2.useState)();
       return useIsomorphicLayoutEffect(() => {
         onFinish && (onFinish?.(), setOnFinish(void 0));
       }, [onFinish]), {
@@ -1976,7 +1976,7 @@ function createAnimations(animations) {
     useAnimatedNumberReaction({
       value
     }, onValue) {
-      import_react3.default.useEffect(() => {
+      import_react2.default.useEffect(() => {
         const instance = value.getInstance();
         let queue = reactionListeners.get(instance);
         if (!queue) {

@@ -23,6 +23,8 @@ interface HousesContextType {
     updateHouse: (id: string, updates: Partial<House>) => void;
     deleteHouse: (id: string) => void;
     saveHouses: (houses: House[]) => void;
+    // TODO: not sure why I don't need a "async" here. It's a promise, but it's not being awaited.
+    syncToServer: () => Promise<{ success: boolean, errorMsg?: string }>
 }
 
 const HousesContext = createContext<HousesContextType | undefined>(undefined);
@@ -81,8 +83,16 @@ export function HousesProvider({ children }: { children: React.ReactNode }) {
         saveHouses(filteredHouses);
     };
 
+    // Give it a few seconds to simulate the network sync
+    const syncToServer = async (): Promise<{ success: boolean, errorMsg?: string }> => {
+        console.log('Syncing to server...');
+        return new Promise((resolve) => {
+            setTimeout(() => { resolve({ success: true }) }, 2500);
+        });
+    };
+
     return (
-        <HousesContext.Provider value={{ houses, addHouse, updateHouse, deleteHouse, saveHouses }}>
+        <HousesContext.Provider value={{ houses, addHouse, updateHouse, deleteHouse, saveHouses, syncToServer }}>
             {children}
         </HousesContext.Provider>
     );
