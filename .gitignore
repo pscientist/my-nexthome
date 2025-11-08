@@ -45,6 +45,7 @@ app-example
 # Prisma / SQLite
 prisma/dev.db
 *.db-journal
+dev.db
 
 # Environment variables
 .env
