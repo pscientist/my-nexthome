@@ -15,6 +15,7 @@ interface House {
     createdAt: string;
     updatedAt: string;
     notes: string;
+    syncedAt?: string;
 }
 
 interface HousesContextType {
@@ -83,12 +84,55 @@ export function HousesProvider({ children }: { children: React.ReactNode }) {
         saveHouses(filteredHouses);
     };
 
-    // Give it a few seconds to simulate the network sync
     const syncToServer = async (): Promise<{ success: boolean, errorMsg?: string }> => {
-        console.log('Syncing to server...');
-        return new Promise((resolve) => {
-            setTimeout(() => { resolve({ success: true }) }, 2500);
+
+        // find the houses with no sync time or was updated    
+        const housesToSync = houses.filter((house) => {
+            return !house.syncedAt || new Date(house.updatedAt) > new Date(house.syncedAt);
         });
+
+        // get the IDs
+        const housesToSyncIDs = housesToSync.map((h) => h.id);
+
+        if (housesToSync.length === 0) {
+            return { success: true }; // auto-wrapped in Promise
+        }
+
+        try {
+            const DUMMY_URL = "https://dummyjson.com/posts";
+
+            const response = await fetch(DUMMY_URL,
+                {
+                    headers: { 'Content-Type': 'application/json' },
+                    method: 'POST',
+                    body: JSON.stringify(housesToSync)
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error(`Server response  {$response.status}`);
+            }
+
+            // update the houses array with new synced timesamp
+            const updatedHouses = houses.map((house) => {
+                const wasSynced = housesToSyncIDs.some(id => id === house.id);
+                if (wasSynced) {
+                    return { ...house, syncedAt: new Date().toISOString() }
+                }
+                return house;
+            });
+
+            await saveHouses(updatedHouses);
+
+            console.log(`${housesToSyncIDs.length} houses synced`);
+
+            return { success: true };
+
+        } catch (e) {
+
+            return { success: false, errorMsg: e instanceof Error ? e.message : 'Unknown error' }
+
+        }
     };
 
     return (
