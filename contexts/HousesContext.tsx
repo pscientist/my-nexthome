@@ -110,7 +110,7 @@ export function HousesProvider({ children }: { children: React.ReactNode }) {
             );
 
             if (!response.ok) {
-                throw new Error(`Server response  {$response.status}`);
+                throw new Error(`Server response ${response.status}`);
             }
 
             // update the houses array with new synced timesamp

@@ -42,7 +42,7 @@ export default function HouseDetails() {
     }
 
     return (
-        <SafeAreaView style={styles.safeArea}>
+        <SafeAreaView style={styles.safeArea} edges={['bottom']}>
             <ScrollView contentContainerStyle={styles.content}>
                 <View style={styles.headerRow}>
                     <Pressable onPress={() => router.back()} style={styles.backBtn}>
