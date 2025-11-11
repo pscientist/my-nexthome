@@ -1,31 +1,8 @@
-import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { useHouses } from '@/contexts/HousesContext';
-import { useState } from 'react';
 
 export default function Index() {
-  const [isSyncing, setIsSyncing] = useState(false);
-  const { houses, syncToServer } = useHouses();
-
-  const handleSync = async () => {
-    setIsSyncing(true);
-
-    try {
-      const result = await syncToServer();
-      if (result.success) {
-        console.log(`Successfully synced ${houses.length} houses to server.`);
-      } else {
-        console.log('Sync failed...', result.errorMsg || 'error...');
-      }
-
-    } catch (error) {
-      Alert.alert('Error', 'An unexpected error happened');
-    } finally {
-      setIsSyncing(false);
-    }
-  }
-
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
@@ -57,12 +34,6 @@ export default function Index() {
           <Text style={styles.cardFooter}>You’ve got this.</Text>
         </View>
 
-
-        <Pressable onPress={handleSync} disabled={isSyncing} style={[styles.syncButton, isSyncing && styles.syncButtonDisabled]}>
-          {isSyncing ?
-            (<ActivityIndicator size="small" color="#FFF6EC" />) : (<Text>Sync to Server</Text>)
-          }
-        </Pressable>
       </View>
     </SafeAreaView>
   );
