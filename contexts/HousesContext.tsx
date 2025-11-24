@@ -1,22 +1,7 @@
 // contexts/HousesContext.tsx
+import { House } from '@/types/house';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { ImageSourcePropType } from 'react-native';
-
-interface House {
-    id: string;
-    title: string;
-    price: string;
-    location: string;
-    rooms: number;
-    image?: ImageSourcePropType;
-    open_date: string; // it'll be an array later
-    open_time: string;
-    createdAt: string;
-    updatedAt: string;
-    notes: string;
-    syncedAt?: string;
-}
 
 interface HousesContextType {
     houses: House[];

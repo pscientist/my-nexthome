@@ -1,19 +1,11 @@
 import { useHouses } from '@/contexts/HousesContext';
+import { ApiHouse } from '@/types/house';
 import { MaterialIcons } from "@expo/vector-icons";
 import { Link } from "expo-router";
 import { useEffect, useState } from 'react';
 import { FlatList, Image, ImageSourcePropType, Pressable, StyleSheet, Text, View } from "react-native";
 import Animated, { Easing, useAnimatedStyle, useSharedValue, withRepeat, withTiming } from 'react-native-reanimated';
 import { SafeAreaView } from "react-native-safe-area-context";
-
-interface ApiHouse {
-    id: number;
-    title: string;
-    location: string;
-    bedrooms: number;
-    bathrooms: number;
-    openHomeTime: string;
-}
 
 export default function Houses() {
     const { houses, saveHouses, syncToServer } = useHouses();
