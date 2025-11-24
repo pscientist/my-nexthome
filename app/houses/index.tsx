@@ -6,56 +6,76 @@ import { FlatList, Image, ImageSourcePropType, Pressable, StyleSheet, Text, View
 import Animated, { Easing, useAnimatedStyle, useSharedValue, withRepeat, withTiming } from 'react-native-reanimated';
 import { SafeAreaView } from "react-native-safe-area-context";
 
-const sample_houses = [
-    {
-        id: "1", title: "Modern Loft", price: "$799,000", location: "88 Kyber Pass Rd, Newmarket",
-        image: require('@/assets/images/open_home4.jpg'),
-        open_date: '2025-10-20',
-        open_time: '14:00',
-        createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(),
-        notes: "Love the view",
-        rooms: 2
-    },
-    {
-        id: "2", title: "Cozy Bungalow", price: "$1.1 million", location: "3 Maple Street, Freemands Bay",
-        image: require('@/assets/images/open_home3.jpg'),
-        open_date: '2025-10-18',
-        open_time: '11:00',
-        createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), notes: "Bedrooms are big!", rooms: 3
-    },
-    {
-        id: "3", title: "Lake House", price: "$779,000", location: "33 Field Tce, Northcote",
-        image: require('@/assets/images/open_home2.jpg'),
-        open_date: '2025-10-16',
-        open_time: '14:00',
-        createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), notes: "Kitchen is quite nice. Need carpet clean.", rooms: 4
-    },
-    {
-        id: "4", title: "Suburban Retreat", price: "$899,000", location: "189 Great North Rd, Grey Lynn",
-        image: require('@/assets/images/open_home1.jpg'),
-        open_date: '2025-10-21',
-        open_time: '14:00',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        notes: "It's a bit too far from the city",
-        rooms: 3
-    },
-];
+interface ApiHouse {
+    id: number;
+    title: string;
+    location: string;
+    bedrooms: number;
+    bathrooms: number;
+    openHomeTime: string;
+}
 
 export default function Houses() {
     const { houses, saveHouses, syncToServer } = useHouses();
     const [isSyncing, setIsSyncing] = useState(false);
     const [serverMessage, setServerMessage] = useState('')
+    const [loading, setLoading] = useState(false);
+    const [fetchError, setFetchError] = useState<string>('');
     const rotation = useSharedValue(0);
 
-    useEffect(
-        () => {
-            if (houses.length === 0) {
-                saveHouses(sample_houses);
+    const fetchHouses = async () => {
+        setLoading(true);
+        setFetchError('');
+
+        try {
+            const response = await fetch('http://localhost:4000/api/open-homes');
+
+            if (!response.ok) {
+                throw new Error(`Failed to fetch houses: ${response.status}`);
             }
-            // saveHouses(sample_houses);
-        },
-        [houses.length, saveHouses]);
+
+            const apiHouses: ApiHouse[] = await response.json();
+
+            // Transform API data to House format
+            const transformedHouses = apiHouses.map((apiHouse) => {
+                // Parse openHomeTime ISO string
+                const openHomeDate = new Date(apiHouse.openHomeTime);
+                const open_date = openHomeDate.toISOString().split('T')[0]; // YYYY-MM-DD
+                const hours = openHomeDate.getHours().toString().padStart(2, '0');
+                const minutes = openHomeDate.getMinutes().toString().padStart(2, '0');
+                const open_time = `${hours}:${minutes}`; // HH:MM
+
+                const now = new Date().toISOString();
+
+                return {
+                    id: apiHouse.id.toString(),
+                    title: apiHouse.title,
+                    location: apiHouse.location,
+                    rooms: apiHouse.bedrooms,
+                    price: "Price on request",
+                    notes: "",
+                    image: require('@/assets/images/open_home1.jpg'),
+                    open_date,
+                    open_time,
+                    createdAt: now,
+                    updatedAt: now,
+                };
+            });
+
+            await saveHouses(transformedHouses);
+        } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : 'Failed to fetch houses';
+            setFetchError(errorMessage);
+            // Fall back to empty state
+            await saveHouses([]);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchHouses();
+    }, []);
 
     useEffect(() => {
         if (isSyncing) {
@@ -107,6 +127,7 @@ export default function Houses() {
 
     const isSuccess = serverMessage.includes('Successfully');
     const isError = serverMessage.includes('failed') || serverMessage.includes('error');
+    const hasFetchError = fetchError.length > 0;
 
     return (
         <SafeAreaView style={styles.safeArea} edges={['bottom']}>
@@ -124,6 +145,14 @@ export default function Houses() {
                                 </Animated.View>
                             </Pressable>
                         </View>
+                        {hasFetchError && (
+                            <View style={styles.messageContainer}>
+                                <MaterialIcons name="error" size={12} color="#C97A40" style={styles.messageIcon} />
+                                <Text style={[styles.messageText, styles.messageTextError]}>
+                                    {fetchError}
+                                </Text>
+                            </View>
+                        )}
                         {(isSyncing || serverMessage) && (
                             <View style={styles.messageContainer}>
                                 {isSyncing && (
