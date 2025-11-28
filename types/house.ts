@@ -22,5 +22,8 @@ export interface ApiHouse {
     bedrooms: number;
     bathrooms: number;
     openHomeTime: string;
+    price: string;
+    listingId: number;
+    pictureHref: string;
 }
 

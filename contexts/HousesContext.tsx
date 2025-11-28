@@ -1,10 +1,12 @@
 // contexts/HousesContext.tsx
-import { House } from '@/types/house';
+import { ApiHouse, House } from '@/types/house';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
 interface HousesContextType {
     houses: House[];
+    loading: boolean;
+    fetchError: string | null;
     addHouse: (house: Omit<House, 'id' | 'createdAt' | 'updatedAt'>) => void;
     updateHouse: (id: string, updates: Partial<House>) => void;
     deleteHouse: (id: string) => void;
@@ -16,9 +18,12 @@ interface HousesContextType {
 const HousesContext = createContext<HousesContextType | undefined>(undefined);
 
 const HOUSES_KEY = 'houses';
+const API_URL = 'http://localhost:4000/api/open-homes';
 
 export function HousesProvider({ children }: { children: React.ReactNode }) {
     const [houses, setHouses] = useState<House[]>([]);
+    const [loading, setLoading] = useState(false);
+    const [fetchError, setFetchError] = useState<string | null>(null);
 
     // Load houses on mount
     useEffect(() => {
@@ -26,13 +31,84 @@ export function HousesProvider({ children }: { children: React.ReactNode }) {
     }, []);
 
     const loadHouses = async () => {
+        setLoading(true);
+        setFetchError(null);
+
         try {
-            const data = await AsyncStorage.getItem(HOUSES_KEY);
-            if (data) {
-                setHouses(JSON.parse(data));
+            // First, try to fetch from server
+            const response = await fetch(API_URL);
+
+            if (!response.ok) {
+                throw new Error(`Failed to fetch houses: ${response.status}`);
             }
+
+            const apiHouses: ApiHouse[] = await response.json();
+
+            // Transform API data to House format
+            const transformedHouses = apiHouses.map((apiHouse) => {
+                // Parse openHomeTime ISO string
+                const openHomeDate = new Date(apiHouse.openHomeTime);
+
+                // console.log(apiHouse);
+                console.log(openHomeDate);
+
+                // Check if date is valid
+                let open_date: string;
+                let open_time: string;
+
+                if (isNaN(openHomeDate.getTime())) {
+                    console.warn(`Invalid date for house ${apiHouse.id}: ${apiHouse.openHomeTime}`);
+                    // Use current date/time as fallback
+                    const fallbackDate = new Date();
+                    open_date = fallbackDate.toISOString().split('T')[0]; // YYYY-MM-DD
+                    const hours = fallbackDate.getHours().toString().padStart(2, '0');
+                    const minutes = fallbackDate.getMinutes().toString().padStart(2, '0');
+                    open_time = `${hours}:${minutes}`; // HH:MM
+                } else {
+                    open_date = openHomeDate.toISOString().split('T')[0]; // YYYY-MM-DD
+                    const hours = openHomeDate.getHours().toString().padStart(2, '0');
+                    const minutes = openHomeDate.getMinutes().toString().padStart(2, '0');
+                    open_time = `${hours}:${minutes}`; // HH:MM
+                }
+
+                // const open_date = "2025-11-28";
+                // const open_time = "10:00";
+
+                const now = new Date().toISOString();
+
+                return {
+                    id: apiHouse.id.toString(),
+                    title: apiHouse.title,
+                    location: apiHouse.location,
+                    rooms: apiHouse.bedrooms,
+                    price: apiHouse.price,
+                    notes: "",
+                    image: { uri: apiHouse.pictureHref },
+                    open_date: open_date,  // YYYY-MM-DD
+                    open_time: open_time,  // HH:MM
+                    createdAt: now,
+                    updatedAt: now,
+                };
+            });
+
+            // Save to AsyncStorage and update state
+            await saveHouses(transformedHouses);
         } catch (error) {
-            console.error('Error loading houses:', error);
+            const errorMessage = error instanceof Error ? error.message : 'Failed to fetch houses';
+            setFetchError(errorMessage);
+            console.error('Error fetching houses from server:', error);
+
+            // Fall back to AsyncStorage
+            try {
+                const data = await AsyncStorage.getItem(HOUSES_KEY);
+                if (data) {
+                    setHouses(JSON.parse(data));
+                }
+            } catch (storageError) {
+                console.error('Error loading houses from storage:', storageError);
+            }
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -121,7 +197,7 @@ export function HousesProvider({ children }: { children: React.ReactNode }) {
     };
 
     return (
-        <HousesContext.Provider value={{ houses, addHouse, updateHouse, deleteHouse, saveHouses, syncToServer }}>
+        <HousesContext.Provider value={{ houses, loading, fetchError, addHouse, updateHouse, deleteHouse, saveHouses, syncToServer }}>
             {children}
         </HousesContext.Provider>
     );

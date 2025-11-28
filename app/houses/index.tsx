@@ -1,5 +1,4 @@
 import { useHouses } from '@/contexts/HousesContext';
-import { ApiHouse } from '@/types/house';
 import { MaterialIcons } from "@expo/vector-icons";
 import { Link } from "expo-router";
 import { useEffect, useState } from 'react';
@@ -8,66 +7,10 @@ import Animated, { Easing, useAnimatedStyle, useSharedValue, withRepeat, withTim
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Houses() {
-    const { houses, saveHouses, syncToServer } = useHouses();
+    const { houses, syncToServer, loading, fetchError } = useHouses();
     const [isSyncing, setIsSyncing] = useState(false);
     const [serverMessage, setServerMessage] = useState('')
-    const [loading, setLoading] = useState(false);
-    const [fetchError, setFetchError] = useState<string>('');
     const rotation = useSharedValue(0);
-
-    const fetchHouses = async () => {
-        setLoading(true);
-        setFetchError('');
-
-        try {
-            const response = await fetch('http://localhost:4000/api/open-homes');
-
-            if (!response.ok) {
-                throw new Error(`Failed to fetch houses: ${response.status}`);
-            }
-
-            const apiHouses: ApiHouse[] = await response.json();
-
-            // Transform API data to House format
-            const transformedHouses = apiHouses.map((apiHouse) => {
-                // Parse openHomeTime ISO string
-                const openHomeDate = new Date(apiHouse.openHomeTime);
-                const open_date = openHomeDate.toISOString().split('T')[0]; // YYYY-MM-DD
-                const hours = openHomeDate.getHours().toString().padStart(2, '0');
-                const minutes = openHomeDate.getMinutes().toString().padStart(2, '0');
-                const open_time = `${hours}:${minutes}`; // HH:MM
-
-                const now = new Date().toISOString();
-
-                return {
-                    id: apiHouse.id.toString(),
-                    title: apiHouse.title,
-                    location: apiHouse.location,
-                    rooms: apiHouse.bedrooms,
-                    price: "Price on request",
-                    notes: "",
-                    image: require('@/assets/images/open_home1.jpg'),
-                    open_date,
-                    open_time,
-                    createdAt: now,
-                    updatedAt: now,
-                };
-            });
-
-            await saveHouses(transformedHouses);
-        } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : 'Failed to fetch houses';
-            setFetchError(errorMessage);
-            // Fall back to empty state
-            await saveHouses([]);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        fetchHouses();
-    }, []);
 
     useEffect(() => {
         if (isSyncing) {
@@ -119,7 +62,7 @@ export default function Houses() {
 
     const isSuccess = serverMessage.includes('Successfully');
     const isError = serverMessage.includes('failed') || serverMessage.includes('error');
-    const hasFetchError = fetchError.length > 0;
+    const hasFetchError = fetchError !== null && fetchError.length > 0;
 
     return (
         <SafeAreaView style={styles.safeArea} edges={['bottom']}>
@@ -141,7 +84,7 @@ export default function Houses() {
                             <View style={styles.messageContainer}>
                                 <MaterialIcons name="error" size={12} color="#C97A40" style={styles.messageIcon} />
                                 <Text style={[styles.messageText, styles.messageTextError]}>
-                                    {fetchError}
+                                    {fetchError || ''}
                                 </Text>
                             </View>
                         )}
