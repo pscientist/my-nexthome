@@ -84,6 +84,8 @@ export function HousesProvider({ children }: { children: React.ReactNode }) {
         setLoading(true);
         setFetchError(null);
 
+        console.log('Loading houses locally...');
+
         try {
 
             const data = await AsyncStorage.getItem(HOUSES_KEY);
@@ -91,6 +93,7 @@ export function HousesProvider({ children }: { children: React.ReactNode }) {
             // Local first
             if (data) {
                 try {
+                    console.log('Local data found. Parsing houses from storage...');
                     setHouses(JSON.parse(data));
                     setLoading(false);
 
@@ -101,6 +104,9 @@ export function HousesProvider({ children }: { children: React.ReactNode }) {
 
         } catch (storageError) {
             console.error('Error loading houses from storage:', storageError);
+
+        } finally {
+            setLoading(false);
         }
 
         // Then, always fetch from server in the background to get fresh data
