@@ -33,21 +33,53 @@ const listingValidationSchema = Yup.object().shape({
 export default function AddEditForm() {
     const [isConnected, setIsConnected] = useState<boolean | null>(null);
     const [uploading, setUploading] = useState(false);
-    const { addHouse } = useHouses();
+    const { addHouse, syncToServer } = useHouses();
+    const [prevConnected, setPrevConnected] = useState<boolean | null>(null);
 
     useEffect(() => {
-        const unsubscribe = NetInfo.addEventListener(state => {
+        // Get initial network state
+        NetInfo.fetch().then(state => {
             setIsConnected(state.isConnected);
-            console.log('Network state changed:', state.isConnected);
+            setPrevConnected(state.isConnected);
+        });
+
+        const unsubscribe = NetInfo.addEventListener(state => {
+            const wasConnected = prevConnected;
+            const isNowConnected = state.isConnected;
+
+            setIsConnected(isNowConnected);
+            console.log('Network state changed:', isNowConnected);
             console.log('Network type:', state.type);
+
+            // Sync when network becomes available (transition from disconnected to connected)
+            if (!wasConnected && isNowConnected) {
+                console.log('Network reconnected, syncing houses...');
+                syncToServer().then(result => {
+                    if (result.success) {
+                        console.log('Houses synced successfully after reconnection');
+                    } else {
+                        console.error('Failed to sync after reconnection:', result.errorMsg);
+                    }
+                }).catch(error => {
+                    console.error('Error syncing after reconnection:', error);
+                });
+            }
+
+            setPrevConnected(isNowConnected);
         });
 
         return () => unsubscribe();
-    }, []
-    );
+    }, [prevConnected, syncToServer]);
 
     const handleSubmit = async (values: any, { resetForm }: any) => {
         try {
+            // Set default open date and time (current date/time)
+            const fallbackDate = new Date();
+            const open_date = fallbackDate.toISOString().split('T')[0]; // YYYY-MM-DD
+            const hours = fallbackDate.getHours().toString().padStart(2, '0');
+            const minutes = fallbackDate.getMinutes().toString().padStart(2, '0');
+            const open_time = `${hours}:${minutes}`; // HH:MM
+
             addHouse({
                 title: values.title,
                 location: values.location,
@@ -55,7 +87,23 @@ export default function AddEditForm() {
                 rooms: parseInt(values.rooms),
                 notes: '',
                 image: undefined,
+                open_date: open_date,
+                open_time: open_time,
             });
+
+            // Try to sync immediately if network is available
+            if (isConnected) {
+                console.log('Network available, syncing new house...');
+                syncToServer().then(result => {
+                    if (result.success) {
+                        console.log('New house synced successfully');
+                    } else {
+                        console.log('Failed to sync new house:', result.errorMsg);
+                    }
+                }).catch(error => {
+                    console.error('Error syncing new house:', error);
+                });
+            }
 
             // Show success message
             Alert.alert(
