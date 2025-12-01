@@ -12,6 +12,12 @@ export default function Houses() {
     const [serverMessage, setServerMessage] = useState('')
     const rotation = useSharedValue(0);
 
+    // Add this to track re-renders
+    console.log('🔄 Houses component re-rendered', {
+        housesCount: houses.length,
+        timestamp: new Date().toISOString()
+    });
+
     useEffect(() => {
         if (isSyncing) {
             rotation.value = withRepeat(
@@ -68,6 +74,11 @@ export default function Houses() {
         <SafeAreaView style={styles.safeArea} edges={['bottom']}>
             <FlatList
                 data={houses}
+                getItemLayout={(data, index) => ({
+                    length: 100,
+                    offset: 100 * index,
+                    index,
+                })}
                 keyExtractor={(item) => item.id}
                 contentContainerStyle={styles.listContent}
                 ListHeaderComponent={
@@ -135,7 +146,6 @@ export default function Houses() {
                                 <Text style={styles.houseLocation}>{item.location}</Text>
                                 <Text style={styles.houseOpenDate}>{item.open_date}</Text>
                                 <Text style={styles.houseOpenDate}>{item.open_time}</Text>
-
                             </View>
                         </Pressable>
                     </Link>

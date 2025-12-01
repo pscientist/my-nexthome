@@ -80,6 +80,12 @@ export default function HouseDetails() {
                     />
                 </View>
 
+                <View style={styles.saveButtonContainer}>
+                    <TouchableOpacity onPress={saveNotes}>
+                        <Text style={styles.saveButton}>Save</Text>
+                    </TouchableOpacity>
+                </View>
+
                 <View style={styles.mapCard}>
                     <Text style={styles.mapTitle}>Location</Text>
                     <View style={styles.mapPlaceholder}>
@@ -97,11 +103,7 @@ export default function HouseDetails() {
                         </MapView>
                     </View>
                 </View>
-                <View style={styles.saveButtonContainer}>
-                    <TouchableOpacity onPress={saveNotes}>
-                        <Text style={styles.saveButton}>Save</Text>
-                    </TouchableOpacity>
-                </View>
+
             </ScrollView>
         </SafeAreaView>
     );
