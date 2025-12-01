@@ -69,7 +69,7 @@ export function HousesProvider({ children }: { children: React.ReactNode }) {
                 location: apiHouse.location,
                 rooms: apiHouse.bedrooms,
                 price: apiHouse.price,
-                notes: "",
+                notes: "", // Default empty, will be merged with local notes
                 image: { uri: apiHouse.pictureHref },
                 open_date: open_date,  // YYYY-MM-DD
                 open_time: open_time,  // HH:MM
@@ -86,15 +86,17 @@ export function HousesProvider({ children }: { children: React.ReactNode }) {
 
         console.log('Loading houses locally...');
 
-        try {
+        let localHouses: House[] = [];
 
+        try {
             const data = await AsyncStorage.getItem(HOUSES_KEY);
 
             // Local first
             if (data) {
                 try {
                     console.log('Local data found. Parsing houses from storage...');
-                    setHouses(JSON.parse(data));
+                    localHouses = JSON.parse(data);
+                    setHouses(localHouses);
                     setLoading(false);
 
                 } catch (parseError) {
@@ -125,7 +127,16 @@ export function HousesProvider({ children }: { children: React.ReactNode }) {
 
             const transformedHouses = transformHousesFunc(apiHouses);
 
-            await saveHouses(transformedHouses);
+            // Merge notes from local houses into transformed houses
+            const mergedHouses = transformedHouses.map(transformedHouse => {
+                const localHouse = localHouses.find(lh => lh.id === transformedHouse.id);
+                return {
+                    ...transformedHouse,
+                    notes: localHouse?.notes || transformedHouse.notes || ""
+                };
+            });
+
+            await saveHouses(mergedHouses);
 
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Failed to fetch houses';
