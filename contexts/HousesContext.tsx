@@ -2,7 +2,7 @@
 import { ApiHouse, House } from '@/types/house';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import NetInfo from '@react-native-community/netinfo';
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 
 interface HousesContextType {
     houses: House[];
@@ -26,7 +26,7 @@ export function HousesProvider({ children }: { children: React.ReactNode }) {
     const [loading, setLoading] = useState(false);
     const [fetchError, setFetchError] = useState<string | null>(null);
     const [loadingFrmServer, setLoadingFrmServer] = useState(false);
-    const [prevConnected, setPrevConnected] = useState<boolean | null>(null);
+    const prevConnectedRef = useRef<boolean | null>(null);
 
     // Load houses on mount
     useEffect(() => {
@@ -37,11 +37,11 @@ export function HousesProvider({ children }: { children: React.ReactNode }) {
     useEffect(() => {
         // Get initial network state
         NetInfo.fetch().then(state => {
-            setPrevConnected(state.isConnected);
+            prevConnectedRef.current = state.isConnected;
         });
 
         const unsubscribe = NetInfo.addEventListener(state => {
-            const wasConnected = prevConnected;
+            const wasConnected = prevConnectedRef.current;
             const isNowConnected = state.isConnected;
 
             console.log('Network state changed:', isNowConnected);
@@ -61,11 +61,11 @@ export function HousesProvider({ children }: { children: React.ReactNode }) {
                 });
             }
 
-            setPrevConnected(isNowConnected);
+            prevConnectedRef.current = isNowConnected;
         });
 
         return () => unsubscribe();
-    }, [prevConnected]);
+    }, []); // Empty deps - listener created once
 
     // Transform API data to House format
     const transformHousesFunc = (apiHouses: ApiHouse[]) => {
