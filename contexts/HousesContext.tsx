@@ -1,6 +1,7 @@
 // contexts/HousesContext.tsx
 import { ApiHouse, House } from '@/types/house';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import NetInfo from '@react-native-community/netinfo';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
 interface HousesContextType {
@@ -25,11 +26,46 @@ export function HousesProvider({ children }: { children: React.ReactNode }) {
     const [loading, setLoading] = useState(false);
     const [fetchError, setFetchError] = useState<string | null>(null);
     const [loadingFrmServer, setLoadingFrmServer] = useState(false);
+    const [prevConnected, setPrevConnected] = useState<boolean | null>(null);
 
     // Load houses on mount
     useEffect(() => {
         loadHouses();
     }, []);
+
+    // Network detection and auto-sync when network becomes available
+    useEffect(() => {
+        // Get initial network state
+        NetInfo.fetch().then(state => {
+            setPrevConnected(state.isConnected);
+        });
+
+        const unsubscribe = NetInfo.addEventListener(state => {
+            const wasConnected = prevConnected;
+            const isNowConnected = state.isConnected;
+
+            console.log('Network state changed:', isNowConnected);
+            console.log('Network type:', state.type);
+
+            // Sync when network becomes available (transition from disconnected to connected)
+            if (!wasConnected && isNowConnected) {
+                console.log('Network reconnected, syncing notes and houses...');
+                syncToServer().then(result => {
+                    if (result.success) {
+                        console.log('Notes and houses synced successfully after reconnection');
+                    } else {
+                        console.error('Failed to sync after reconnection:', result.errorMsg);
+                    }
+                }).catch(error => {
+                    console.error('Error syncing after reconnection:', error);
+                });
+            }
+
+            setPrevConnected(isNowConnected);
+        });
+
+        return () => unsubscribe();
+    }, [prevConnected]);
 
     // Transform API data to House format
     const transformHousesFunc = (apiHouses: ApiHouse[]) => {
