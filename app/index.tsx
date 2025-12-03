@@ -31,7 +31,7 @@ export default function Index() {
             Walk through each room and note how natural light changes—your future mornings will
             thank you.
           </Text>
-          <Text style={styles.cardFooter}>You’ve got this.</Text>
+          <Text style={styles.cardFooter}>You’ve got this!</Text>
         </View>
 
       </View>

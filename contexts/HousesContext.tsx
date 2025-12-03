@@ -1,4 +1,5 @@
 // contexts/HousesContext.tsx
+import { getApiBaseUrl } from '@/config/env';
 import { ApiHouse, House } from '@/types/house';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import NetInfo from '@react-native-community/netinfo';
@@ -19,7 +20,7 @@ interface HousesContextType {
 const HousesContext = createContext<HousesContextType | undefined>(undefined);
 
 const HOUSES_KEY = 'houses';
-const API_URL = 'http://localhost:4000/api/open-homes';
+const API_URL = `${getApiBaseUrl()}/api/open-homes`;
 
 export function HousesProvider({ children }: { children: React.ReactNode }) {
     const [houses, setHouses] = useState<House[]>([]);
