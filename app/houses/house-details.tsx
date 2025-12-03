@@ -1,5 +1,6 @@
 import { useHouses } from "@/contexts/HousesContext";
 import { MaterialIcons } from "@expo/vector-icons";
+import NetInfo from "@react-native-community/netinfo";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { Image, Pressable, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
@@ -9,7 +10,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 export default function HouseDetails() {
     const router = useRouter();
     const { id } = useLocalSearchParams();
-    const { houses, updateHouse } = useHouses();
+    const { houses, updateHouse, syncToServer } = useHouses();
     const [textNotes, setTextNotes] = useState("");
     const [region, setRegion] = useState({
         latitude: -36.8485,
@@ -38,6 +39,23 @@ export default function HouseDetails() {
 
     const saveNotes = () => {
         updateHouse(id as string, { notes: textNotes });
+
+        // If we're online, try to sync the updated notes to the server immediately.
+        NetInfo.fetch().then(state => {
+            if (state.isConnected) {
+                console.log('Network available, syncing notes...');
+                syncToServer().then(result => {
+                    if (result.success) {
+                        console.log('Notes synced successfully');
+                    } else {
+                        console.error('Failed to sync notes:', result.errorMsg);
+                    }
+                }).catch(error => {
+                    console.error('Error syncing notes:', error);
+                });
+            }
+        });
+
         router.back();
     }
 
