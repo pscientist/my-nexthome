@@ -193,7 +193,7 @@ export function HousesProvider({ children }: { children: React.ReactNode }) {
                 setLoading(false);
             }
         };
-    }
+    }; // end function loadHouses
 
     const saveHouses = async (newHouses: House[]) => {
         try {
