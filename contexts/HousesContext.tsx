@@ -148,43 +148,47 @@ export function HousesProvider({ children }: { children: React.ReactNode }) {
             setLoading(false);
         }
 
-        // Then, always fetch from server in the background to get fresh data
-        try {
-            // Fetch from server
-            setLoadingFrmServer(true);
-            console.log('Fetching houses from server...');
+        // If connected with the network, 
+        //      fetch from server to get fresh data
+        const netInfo = await NetInfo.fetch();
+        if (netInfo.isConnected) {
+            try {
+                // Fetch from server
+                setLoadingFrmServer(true);
+                console.log('Fetching houses from server...');
 
-            const response = await fetch(API_URL);
+                const response = await fetch(API_URL);
 
-            if (!response.ok) {
-                throw new Error(`Failed to fetch houses: ${response.status}`);
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch houses: ${response.status}`);
+                }
+
+                const apiHouses: ApiHouse[] = await response.json();
+
+                const transformedHouses = transformHousesFunc(apiHouses);
+
+                // Merge notes from local houses into transformed houses
+                const mergedHouses = transformedHouses.map(transformedHouse => {
+                    const localHouse = localHouses.find(lh => lh.id === transformedHouse.id);
+                    return {
+                        ...transformedHouse,
+                        notes: localHouse?.notes || transformedHouse.notes || ""
+                    };
+                });
+
+                await saveHouses(mergedHouses);
+
+            } catch (error) {
+                const errorMessage = error instanceof Error ? error.message : 'Failed to fetch houses';
+                setFetchError(errorMessage);
+                console.error('Error fetching houses from server:', error);
+
+            } finally {
+                setLoadingFrmServer(false);
+                setLoading(false);
+
             }
-
-            const apiHouses: ApiHouse[] = await response.json();
-
-            const transformedHouses = transformHousesFunc(apiHouses);
-
-            // Merge notes from local houses into transformed houses
-            const mergedHouses = transformedHouses.map(transformedHouse => {
-                const localHouse = localHouses.find(lh => lh.id === transformedHouse.id);
-                return {
-                    ...transformedHouse,
-                    notes: localHouse?.notes || transformedHouse.notes || ""
-                };
-            });
-
-            await saveHouses(mergedHouses);
-
-        } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : 'Failed to fetch houses';
-            setFetchError(errorMessage);
-            console.error('Error fetching houses from server:', error);
-
-        } finally {
-            setLoadingFrmServer(false);
-            setLoading(false);
-
-        }
+        };
     };
 
     const saveHouses = async (newHouses: House[]) => {
