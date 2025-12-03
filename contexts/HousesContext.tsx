@@ -118,6 +118,9 @@ export function HousesProvider({ children }: { children: React.ReactNode }) {
     }; // end function transformHousesFunc
 
     const loadHouses = async () => {
+
+        let mergedHouses: House[] = [];
+
         setLoading(true);
         setFetchError(null);
 
@@ -133,8 +136,8 @@ export function HousesProvider({ children }: { children: React.ReactNode }) {
                 try {
                     console.log('Local data found. Parsing houses from storage...');
                     localHouses = JSON.parse(data);
+                    // mergedHouses = localHouses;
                     setHouses(localHouses);
-                    setLoading(false);
 
                 } catch (parseError) {
                     console.error('Error parsing houses from storage:', parseError);
@@ -168,7 +171,7 @@ export function HousesProvider({ children }: { children: React.ReactNode }) {
                 const transformedHouses = transformHousesFunc(apiHouses);
 
                 // Merge notes from local houses into transformed houses
-                const mergedHouses = transformedHouses.map(transformedHouse => {
+                mergedHouses = transformedHouses.map(transformedHouse => {
                     const localHouse = localHouses.find(lh => lh.id === transformedHouse.id);
                     return {
                         ...transformedHouse,
@@ -178,6 +181,8 @@ export function HousesProvider({ children }: { children: React.ReactNode }) {
 
                 await saveHouses(mergedHouses);
 
+                setHouses(mergedHouses);
+
             } catch (error) {
                 const errorMessage = error instanceof Error ? error.message : 'Failed to fetch houses';
                 setFetchError(errorMessage);
@@ -186,15 +191,14 @@ export function HousesProvider({ children }: { children: React.ReactNode }) {
             } finally {
                 setLoadingFrmServer(false);
                 setLoading(false);
-
             }
         };
-    };
+    }
 
     const saveHouses = async (newHouses: House[]) => {
         try {
             await AsyncStorage.setItem(HOUSES_KEY, JSON.stringify(newHouses));
-            setHouses(newHouses);
+            // Remove setHouses from here - let callers handle state updates
         } catch (error) {
             console.error('Error saving houses:', error);
         }
@@ -207,7 +211,9 @@ export function HousesProvider({ children }: { children: React.ReactNode }) {
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
         };
-        saveHouses([...houses, newHouse]);
+        const updatedHouses = [...houses, newHouse];
+        saveHouses(updatedHouses);
+        setHouses(updatedHouses); // Add this
     };
 
     const updateHouse = (id: string, updates: Partial<House>) => {
@@ -217,11 +223,13 @@ export function HousesProvider({ children }: { children: React.ReactNode }) {
                 : house
         );
         saveHouses(updatedHouses);
+        setHouses(updatedHouses); // Add this
     };
 
     const deleteHouse = (id: string) => {
         const filteredHouses = houses.filter(house => house.id !== id);
         saveHouses(filteredHouses);
+        setHouses(filteredHouses); // Add this
     };
 
     const syncToServer = async (): Promise<{ success: boolean, errorMsg?: string }> => {
@@ -263,6 +271,7 @@ export function HousesProvider({ children }: { children: React.ReactNode }) {
             });
 
             await saveHouses(updatedHouses);
+            setHouses(updatedHouses); // Add this
 
             console.log(`${housesToSyncIDs.length} houses synced`);
 
