@@ -18,8 +18,7 @@ import { Calendar } from "react-native-calendars";
 export default function CalendarScreen() {
     const [selected, setSelected] = useState<string>(new Date().toISOString().slice(0, 10));
     const { houses } = useHouses();
-
-    // Example local “events” to show how marking works (replace with your data shape later)
+    // Default local “events” to show how marking works (replace with your data shape later)
     const [events, setEvents] = useState<EventsByDate>({
         "2025-10-12": ["Open Home: 23 Rose St", "Viewing: 2:30 PM"],
     });

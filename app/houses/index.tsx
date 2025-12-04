@@ -3,7 +3,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { Link } from "expo-router";
 import { useEffect, useState } from 'react';
 import { FlatList, Image, ImageSourcePropType, Pressable, StyleSheet, Text, View } from "react-native";
-import Animated, { Easing, useAnimatedStyle, useSharedValue, withRepeat, withTiming } from 'react-native-reanimated';
+import { Easing, useAnimatedStyle, useSharedValue, withRepeat, withTiming } from 'react-native-reanimated';
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Houses() {
@@ -13,10 +13,10 @@ export default function Houses() {
     const rotation = useSharedValue(0);
 
     // Add this to track re-renders
-    console.log('🔄 Houses component re-rendered', {
-        housesCount: houses.length,
-        timestamp: new Date().toISOString()
-    });
+    // console.log('🔄 Houses component re-rendered', {
+    //     housesCount: houses.length,
+    //     timestamp: new Date().toISOString()
+    // });
 
     useEffect(() => {
         if (isSyncing) {
@@ -85,11 +85,11 @@ export default function Houses() {
                     <View>
                         <View style={styles.headerContainer}>
                             <Text style={styles.screenTitle}>Open Homes</Text>
-                            <Pressable onPress={handleSync} style={styles.syncButton} disabled={isSyncing}>
+                            {/* TODO: think about this in v2<Pressable onPress={handleSync} style={styles.syncButton} disabled={isSyncing}>
                                 <Animated.View style={animatedStyle}>
                                     <MaterialIcons name="sync" size={24} color="#3A2F2F" />
                                 </Animated.View>
-                            </Pressable>
+                            </Pressable> */}
                         </View>
                         {hasFetchError && (
                             <View style={styles.messageContainer}>

@@ -13,6 +13,7 @@ interface HousesContextType {
     updateHouse: (id: string, updates: Partial<House>) => void;
     deleteHouse: (id: string) => void;
     saveHouses: (houses: House[]) => void;
+    clearHouses: () => Promise<void>;
     // TODO: not sure why I don't need a "async" here. It's a promise, but it's not being awaited.
     syncToServer: () => Promise<{ success: boolean, errorMsg?: string }>
 }
@@ -232,6 +233,17 @@ export function HousesProvider({ children }: { children: React.ReactNode }) {
         setHouses(filteredHouses); // Add this
     };
 
+    const clearHouses = async (): Promise<void> => {
+        try {
+            await AsyncStorage.removeItem(HOUSES_KEY);
+            setHouses([]);
+            console.log('Houses cleared from AsyncStorage');
+        } catch (error) {
+            console.error('Error clearing houses from AsyncStorage:', error);
+            throw error;
+        }
+    };
+
     const syncToServer = async (): Promise<{ success: boolean, errorMsg?: string }> => {
 
         // find the houses with no sync time or was updated    
@@ -247,9 +259,7 @@ export function HousesProvider({ children }: { children: React.ReactNode }) {
         }
 
         try {
-            const DUMMY_URL = "https://dummyjson.com/posts";
-
-            const response = await fetch(DUMMY_URL,
+            const response = await fetch(`${API_URL}/sync`,
                 {
                     headers: { 'Content-Type': 'application/json' },
                     method: 'POST',
@@ -285,7 +295,7 @@ export function HousesProvider({ children }: { children: React.ReactNode }) {
     };
 
     return (
-        <HousesContext.Provider value={{ houses, loading, fetchError, addHouse, updateHouse, deleteHouse, saveHouses, syncToServer }}>
+        <HousesContext.Provider value={{ houses, loading, fetchError, addHouse, updateHouse, deleteHouse, saveHouses, clearHouses, syncToServer }}>
             {children}
         </HousesContext.Provider>
     );
