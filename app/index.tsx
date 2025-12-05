@@ -42,10 +42,29 @@ export default function Index() {
 
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Quick Summary</Text>
-          <Text style={styles.cardBody}>Next viewing:
-            {nextViewing.length > 0 ? `${nextViewing[0].title} at ${nextViewing[0].open_time} 
-            on ${formatDateDMY(nextViewing[0].open_date)} in ${nextViewing[0].location}.` : 'No open homes today.'}
-          </Text>
+
+          {nextViewing.length > 0 ? (
+            <View style={styles.nextViewingContainer}>
+              <Text style={styles.nextViewingLabel}>Next viewing</Text>
+              <Text style={styles.propertyTitle}>{nextViewing[0].title}</Text>
+              <View style={styles.viewingDetails}>
+                <View style={styles.detailRow}>
+                  <Text style={styles.detailLabel}>Time:</Text>
+                  <Text style={styles.detailValue}>{nextViewing[0].open_time}</Text>
+                </View>
+                <View style={styles.detailRow}>
+                  <Text style={styles.detailLabel}>Date:</Text>
+                  <Text style={styles.detailValue}>{formatDateDMY(nextViewing[0].open_date)}</Text>
+                </View>
+                <View style={styles.detailRow}>
+                  <Text style={styles.detailLabel}>Location:</Text>
+                  <Text style={styles.detailValue}>{nextViewing[0].location}</Text>
+                </View>
+              </View>
+            </View>
+          ) : (
+            <Text style={styles.cardBody}>No open homes today.</Text>
+          )}
 
           <View style={styles.statRow}>
             <View style={styles.statBlock}>
@@ -155,6 +174,48 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     color: "#5A4A42",
     marginBottom: 12,
+  },
+  nextViewingContainer: {
+    marginBottom: 16,
+  },
+  nextViewingLabel: {
+    fontSize: 12,
+    letterSpacing: 0.8,
+    textTransform: "uppercase",
+    color: "#8C6D4A",
+    fontWeight: "600",
+    marginBottom: 8,
+  },
+  propertyTitle: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#4A2C1F",
+    lineHeight: 28,
+    marginBottom: 12,
+  },
+  viewingDetails: {
+    backgroundColor: "#F9E3C7",
+    borderRadius: 10,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: "#E8CDAA",
+  },
+  detailRow: {
+    flexDirection: "row",
+    marginBottom: 6,
+    alignItems: "flex-start",
+  },
+  detailLabel: {
+    fontSize: 14,
+    color: "#7C6655",
+    fontWeight: "600",
+    minWidth: 70,
+  },
+  detailValue: {
+    fontSize: 14,
+    color: "#5A4A42",
+    flex: 1,
+    fontWeight: "500",
   },
   statRow: {
     flexDirection: "row",
