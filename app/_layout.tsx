@@ -1,14 +1,35 @@
 import { Tabs } from "expo-router";
 // import { NativeWindStyleSheet } from "nativewind";
+import { CONFIG } from "@/config/env";
+import { ClerkProvider } from "@clerk/clerk-expo";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import { PlatformPressable, Text } from '@react-navigation/elements';
 import { useLinkBuilder, useTheme } from '@react-navigation/native';
 import { TamaguiProvider } from '@tamagui/core';
+import * as SecureStore from 'expo-secure-store';
 import { Platform, StyleSheet, View } from 'react-native';
 import { HousesProvider } from "../contexts/HousesContext";
 import "../global.css";
 import config from '../tamagui.config';
+
+// Token cache for Clerk
+const tokenCache = {
+  async getToken(key: string) {
+    try {
+      return SecureStore.getItemAsync(key);
+    } catch (err) {
+      return null;
+    }
+  },
+  async saveToken(key: string, value: string) {
+    try {
+      return SecureStore.setItemAsync(key, value);
+    } catch (err) {
+      return;
+    }
+  },
+};
 
 // Load Reactotron only in development
 if (__DEV__) {
@@ -18,63 +39,66 @@ if (__DEV__) {
 export default function RootLayout() {
 
   return (
-    <TamaguiProvider config={config}>
-      <HousesProvider>
-        <Tabs
-          tabBar={(props) => <FloatingTabBar {...props} />}
-        >
-          <Tabs.Screen
-            name="index"
-            options={{
-              title: "Home",
-              tabBarIcon: ({ color, size }) => (
-                <MaterialIcons name="home" size={size} color={color} />
-              ),
-            }}
-          />
-          <Tabs.Screen
-            name="houses"
-            options={{
-              title: "Houses",
-              tabBarIcon: ({ color, size }) => (
-                <MaterialIcons name="format-list-bulleted" size={size} color={color} />
-              ),
-            }}
-          />
-          <Tabs.Screen
-            name="addeditform"
-            options={{
-              title: "Add/Edit",
-              tabBarIcon: ({ focused }) => (
-                <MaterialIcons
-                  name="add"
-                  size={28}
-                  color={focused ? "#FFFFFF" : "#765227"}
-                />
-              ),
-            }}
-          />
-          <Tabs.Screen
-            name="calendar"
-            options={{
-              title: "Calendar",
-              tabBarIcon: ({ color, size }) => (
-                <MaterialIcons name="event" size={size} color={color} />
-              ),
-            }}
-          />
-          <Tabs.Screen
-            name="settings"
-            options={{
-              title: "Settings",
-              tabBarIcon: ({ color, size }) => (
-                <MaterialIcons name="settings" size={size} color={color} />
-              ),
-            }}
-          />
-        </Tabs>
-      </HousesProvider>
-    </TamaguiProvider>
+    <ClerkProvider publishableKey={CONFIG.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY}
+      tokenCache={tokenCache}>
+      <TamaguiProvider config={config}>
+        <HousesProvider>
+          <Tabs
+            tabBar={(props) => <FloatingTabBar {...props} />}
+          >
+            <Tabs.Screen
+              name="index"
+              options={{
+                title: "Home",
+                tabBarIcon: ({ color, size }) => (
+                  <MaterialIcons name="home" size={size} color={color} />
+                ),
+              }}
+            />
+            <Tabs.Screen
+              name="houses"
+              options={{
+                title: "Houses",
+                tabBarIcon: ({ color, size }) => (
+                  <MaterialIcons name="format-list-bulleted" size={size} color={color} />
+                ),
+              }}
+            />
+            <Tabs.Screen
+              name="addeditform"
+              options={{
+                title: "Add/Edit",
+                tabBarIcon: ({ focused }) => (
+                  <MaterialIcons
+                    name="add"
+                    size={28}
+                    color={focused ? "#FFFFFF" : "#765227"}
+                  />
+                ),
+              }}
+            />
+            <Tabs.Screen
+              name="calendar"
+              options={{
+                title: "Calendar",
+                tabBarIcon: ({ color, size }) => (
+                  <MaterialIcons name="event" size={size} color={color} />
+                ),
+              }}
+            />
+            <Tabs.Screen
+              name="settings"
+              options={{
+                title: "Settings",
+                tabBarIcon: ({ color, size }) => (
+                  <MaterialIcons name="settings" size={size} color={color} />
+                ),
+              }}
+            />
+          </Tabs>
+        </HousesProvider>
+      </TamaguiProvider>
+    </ClerkProvider>
   );
 }
 

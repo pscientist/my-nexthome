@@ -38,6 +38,7 @@ export default function HouseDetails() {
     }, [house]);
 
     const saveNotes = () => {
+        // save locally first=
         updateHouse(id as string, { notes: textNotes });
 
         // If we're online, try to sync the updated notes to the server immediately.

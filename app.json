@@ -9,6 +9,7 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
+      "associatedDomains": [],
       "supportsTablet": true,
       "bundleIdentifier": "com.cathyapp1234.househunt",
       "infoPlist": {
@@ -43,7 +44,8 @@
             "backgroundColor": "#000000"
           }
         }
-      ]
+      ],
+      "expo-secure-store"
     ],
     "experiments": {
       "typedRoutes": true,

@@ -14,7 +14,8 @@ interface HousesContextType {
     deleteHouse: (id: string) => void;
     saveHouses: (houses: House[]) => void;
     clearHouses: () => Promise<void>;
-    // TODO: not sure why I don't need a "async" here. It's a promise, but it's not being awaited.
+    // TODO: not sure why I don't need a "async" here.
+    //  It's a promise, but it's not being awaited.
     syncToServer: () => Promise<{ success: boolean, errorMsg?: string }>
 }
 
