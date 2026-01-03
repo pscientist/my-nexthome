@@ -1,13 +1,16 @@
 import { useHouses } from '@/contexts/HousesContext';
 import { formatDateDMY } from '@/utils/dateFormat';
+import { useUser } from '@clerk/clerk-expo';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Index() {
-
+  const { user } = useUser();
   const { houses } = useHouses();
   const nextViewing = houses.slice(0, 1);
+
+  const displayName = user?.firstName || user?.emailAddresses[0].emailAddress;
 
   const clearAsyncStorage = async () => {
     Alert.alert(
@@ -38,7 +41,7 @@ export default function Index() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
-        <Text style={styles.screenTitle}>Dashboard</Text>
+        <Text style={styles.screenTitle}>Hello {displayName}</Text>
 
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Quick Summary</Text>
@@ -102,6 +105,16 @@ export default function Index() {
 }
 
 const styles = StyleSheet.create({
+  headerContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  greeting: {
+    fontSize: 24,
+    fontWeight: "700",
+    color: "#3A2F2F",
+  },
   syncButton: {
     backgroundColor: "#C97A40",
     paddingVertical: 16,

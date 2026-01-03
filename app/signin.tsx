@@ -26,6 +26,7 @@ export default function SignIn() {
 
             if (createdSessionId) {
                 await setActive!({ session: createdSessionId })
+                console.log('Session created:', createdSessionId)
                 router.replace('/')
             } else {
                 console.log('Sign in was cancelled or no session created')
